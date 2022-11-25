@@ -2,6 +2,7 @@ package dev.vendicated.vencord;
 
 import androidx.annotation.NonNull;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -12,6 +13,7 @@ import java.io.IOException;
 public class MainActivity extends Activity {
     private WebView wv;
 
+    @SuppressLint("SetJavaScriptEnabled") // mad? watch this swag
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,8 +34,7 @@ public class MainActivity extends Activity {
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
         s.setAllowFileAccess(true);
-
-
+        
         try {
             HttpClient.fetchVencord();
         } catch (IOException ex) {
@@ -46,15 +47,13 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    protected void onSaveInstanceState(@NonNull Bundle state)
-    {
+    protected void onSaveInstanceState(@NonNull Bundle state) {
         super.onSaveInstanceState(state);
         wv.saveState(state);
     }
 
     @Override
-    protected void onRestoreInstanceState(Bundle state)
-    {
+    protected void onRestoreInstanceState(Bundle state) {
         super.onRestoreInstanceState(state);
         wv.restoreState(state);
     }

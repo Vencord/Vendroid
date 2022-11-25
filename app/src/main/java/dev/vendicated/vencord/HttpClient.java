@@ -22,14 +22,14 @@ public class HttpClient {
         @NonNull
         public String getMessage() {
             if (message == null) {
-                try {
+                try(var es = conn.getErrorStream()) {
                     message = String.format(
                             Locale.ENGLISH,
                             "%d: %s (%s)\n%s",
                             conn.getResponseCode(),
                             conn.getResponseMessage(),
                             conn.getURL().toString(),
-                            readAsText(conn.getErrorStream())
+                            readAsText(es)
                     );
                 } catch (IOException ex) {
                     message = "Error while building message lmao. Url is " + conn.getURL().toString();
@@ -67,6 +67,7 @@ public class HttpClient {
             }
             baos.flush();
 
+            //noinspection CharsetObjectCanBeUsed thank you so much android studio but no i do not want to use an sdk33 api ._.
             return baos.toString("UTF-8");
         }
     }

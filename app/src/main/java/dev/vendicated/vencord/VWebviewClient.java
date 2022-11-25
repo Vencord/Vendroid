@@ -11,8 +11,8 @@ import java.net.URL;
 import java.util.*;
 
 public class VWebviewClient extends WebViewClient {
-    @Override
-    public boolean shouldOverrideUrlLoading(WebView view, String url){
+    @Override // this makes URLs open in the webview instead of external browser
+    public boolean shouldOverrideUrlLoading(WebView view, String url) {
         return false;
     }
 
@@ -45,7 +45,6 @@ public class VWebviewClient extends WebViewClient {
 
         var code = conn.getResponseCode();
         var msg = conn.getResponseMessage();
-        conn.getHeaderFields();
 
         var headers = conn.getHeaderFields();
         var modifiedHeaders = new HashMap<String, String>(headers.size());
