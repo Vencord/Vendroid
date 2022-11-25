@@ -1,5 +1,8 @@
 package dev.vendicated.vencord;
 
+import android.app.Activity;
+import android.content.res.Resources;
+
 import androidx.annotation.NonNull;
 
 import java.io.*;
@@ -39,14 +42,20 @@ public class HttpClient {
         }
     }
 
-    public static String vencord;
+    public static String VencordRuntime;
+    public static String VencordMobileRuntime;
 
-    public static void fetchVencord() throws IOException {
-        if (vencord != null) return;
+    public static void fetchVencord(Activity activity) throws IOException {
+        if (VencordRuntime != null) return;
+
+        var res = activity.getResources();
+        try (var is = res.openRawResource(R.raw.vencord_mobile)) {
+            VencordMobileRuntime = readAsText(is);
+        }
 
         var conn = fetch(VENCORD_BUNDLE_URL);
         try (var is = conn.getInputStream()) {
-            vencord = readAsText(is);
+            VencordRuntime = readAsText(is);
         }
     }
 

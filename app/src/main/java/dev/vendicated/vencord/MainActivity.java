@@ -39,9 +39,11 @@ public class MainActivity extends Activity {
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
         s.setAllowFileAccess(true);
-        
+
+        wv.addJavascriptInterface(new VencordNative(this, wv), "VencordMobileNative");
+
         try {
-            HttpClient.fetchVencord();
+            HttpClient.fetchVencord(this);
         } catch (IOException ex) {
             Logger.e("Failed to fetch Vencord", ex);
             return;
@@ -52,8 +54,8 @@ public class MainActivity extends Activity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && wv != null && wv.canGoBack()) {
-            wv.goBack();
+        if (keyCode == KeyEvent.KEYCODE_BACK && wv != null) {
+            runOnUiThread(() -> wv.evaluateJavascript("VencordMobile.onBackPress()", null));
             return true;
         }
         return super.onKeyDown(keyCode, event);

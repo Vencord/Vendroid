@@ -18,7 +18,8 @@ public class VWebviewClient extends WebViewClient {
 
     @Override
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
-        view.evaluateJavascript(HttpClient.vencord, null);
+        view.evaluateJavascript(HttpClient.VencordRuntime, null);
+        view.evaluateJavascript(HttpClient.VencordMobileRuntime, null);
     }
 
     @Nullable
