@@ -1,5 +1,7 @@
 package dev.vendicated.vencord;
 
+import androidx.annotation.NonNull;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
@@ -9,6 +11,7 @@ import android.webkit.WebView;
 import java.io.IOException;
 
 public class MainActivity extends Activity {
+    private WebView wv;
 
     @SuppressLint("SetJavaScriptEnabled") // mad? watch this swag
     @Override
@@ -20,7 +23,7 @@ public class MainActivity extends Activity {
 
         setContentView(R.layout.activity_main);
 
-        WebView wv = findViewById(R.id.webview);
+        wv = findViewById(R.id.webview);
 
         explodeAndroid();
 
@@ -39,7 +42,20 @@ public class MainActivity extends Activity {
             return;
         }
 
-        wv.loadUrl("https://discord.com/app");
+        if (savedInstanceState == null)
+            wv.loadUrl("https://discord.com/app");
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle state) {
+        super.onSaveInstanceState(state);
+        wv.saveState(state);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle state) {
+        super.onRestoreInstanceState(state);
+        wv.restoreState(state);
     }
 
     private void explodeAndroid() {
