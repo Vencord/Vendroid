@@ -68,7 +68,6 @@ public class MainActivity extends Activity {
 
         if (resultCode != RESULT_OK || intent == null) {
             filePathCallback.onReceiveValue(null);
-            return;
         } else {
             Uri[] uris;
             try {
@@ -85,6 +84,7 @@ public class MainActivity extends Activity {
                 Logger.e("Error during file upload", ex);
                 uris = null;
             }
+
             filePathCallback.onReceiveValue(uris);
         }
         filePathCallback = null;
