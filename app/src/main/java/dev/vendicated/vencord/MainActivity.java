@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.webkit.ValueCallback;
 import android.webkit.WebView;
@@ -53,9 +52,9 @@ public class MainActivity extends Activity {
         }
 
         Intent intent = getIntent();
-        if(Objects.equals(intent.getAction(), Intent.ACTION_VIEW)) {
+        if (Objects.equals(intent.getAction(), Intent.ACTION_VIEW)) {
             Uri data = intent.getData();
-            if(data != null) handleUrl(intent.getData());
+            if (data != null) handleUrl(intent.getData());
         } else {
             wv.loadUrl("https://discord.com/app");
         }
@@ -111,12 +110,13 @@ public class MainActivity extends Activity {
     }
 
     public void handleUrl(Uri url) {
-        if(url != null) {
-            if(!url.getAuthority().contains("discord")) return;
-            if(!wvInitialized) {
+        if (url != null) {
+            if (!url.getAuthority().contains("discord")) return;
+            if (!wvInitialized) {
                 wv.loadUrl(url.toString());
             } else {
-                wv.evaluateJavascript("Vencord.Webpack.Common.NavigationRouter.transitionTo(\"" + url.getPath() + "\")" , (result) -> {});
+                wv.evaluateJavascript("Vencord.Webpack.Common.NavigationRouter.transitionTo(\"" + url.getPath() + "\")", (result) -> {
+                });
             }
         }
     }
@@ -125,7 +125,7 @@ public class MainActivity extends Activity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         Uri data = intent.getData();
-        if(data != null) handleUrl(data);
+        if (data != null) handleUrl(data);
     }
 
 }
