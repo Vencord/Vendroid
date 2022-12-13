@@ -11,9 +11,11 @@ import android.webkit.ValueCallback;
 import android.webkit.WebView;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class MainActivity extends Activity {
     public static final int FILECHOOSER_RESULTCODE = 8485;
+    private boolean wvInitialized = false;
     private WebView wv;
 
     public ValueCallback<Uri[]> filePathCallback;
@@ -49,7 +51,15 @@ public class MainActivity extends Activity {
             return;
         }
 
-        wv.loadUrl("https://discord.com/app");
+        Intent intent = getIntent();
+        if (Objects.equals(intent.getAction(), Intent.ACTION_VIEW)) {
+            Uri data = intent.getData();
+            if (data != null) handleUrl(intent.getData());
+        } else {
+            wv.loadUrl("https://discord.com/app");
+        }
+
+        wvInitialized = true;
     }
 
     @Override
@@ -98,4 +108,24 @@ public class MainActivity extends Activity {
                         .build()
         );
     }
+
+    public void handleUrl(Uri url) {
+        if (url != null) {
+            if (!url.getAuthority().contains("discord")) return;
+            if (!wvInitialized) {
+                wv.loadUrl(url.toString());
+            } else {
+                wv.evaluateJavascript("Vencord.Webpack.Common.NavigationRouter.transitionTo(\"" + url.getPath() + "\")", (result) -> {
+                });
+            }
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Uri data = intent.getData();
+        if (data != null) handleUrl(data);
+    }
+
 }
