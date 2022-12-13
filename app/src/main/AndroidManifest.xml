@@ -15,10 +15,22 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:configChanges="orientation|keyboardHidden|screenSize|layoutDirection">
+            android:configChanges="orientation|keyboardHidden|screenSize|layoutDirection"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="https" />
+                <data android:scheme="http" />
+                <data android:host="discord.com" />
+                <data android:host="*.discord.com" />
+                <data android:host="discordapp.com" />
+                <data android:host="*.discordapp.com" />
             </intent-filter>
         </activity>
     </application>
