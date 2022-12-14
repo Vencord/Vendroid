@@ -48,4 +48,5 @@ jobs:
           mv app/build/outputs/apk/release/app-release.apk Vencord-$TAG.apk
           gh release create $TAG --generate-notes --title "Vencord $TAG" Vencord-$TAG.apk
         env:
-          TAG: ${{ env.release_tag }}      
+          TAG: ${{ env.release_tag }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
