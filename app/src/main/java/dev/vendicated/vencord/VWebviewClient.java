@@ -1,6 +1,7 @@
 package dev.vendicated.vencord;
 
 import android.graphics.Bitmap;
+import android.view.View;
 import android.webkit.*;
 
 import androidx.annotation.Nullable;
@@ -20,6 +21,12 @@ public class VWebviewClient extends WebViewClient {
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
         view.evaluateJavascript(HttpClient.VencordRuntime, null);
         view.evaluateJavascript(HttpClient.VencordMobileRuntime, null);
+    }
+
+    @Override
+    public void onPageFinished(WebView view, String url) {
+        view.setVisibility(View.VISIBLE);
+        super.onPageFinished(view, url);
     }
 
     @Nullable
