@@ -25,9 +25,6 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        var bar = this.getActionBar();
-        if (bar != null) bar.hide();
-
         setContentView(R.layout.activity_main);
 
         wv = findViewById(R.id.webview);
