@@ -1,5 +1,6 @@
 package dev.vendicated.vencord;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.view.View;
 import android.webkit.*;
@@ -12,9 +13,16 @@ import java.net.URL;
 import java.util.*;
 
 public class VWebviewClient extends WebViewClient {
-    @Override // this makes URLs open in the webview instead of external browser
-    public boolean shouldOverrideUrlLoading(WebView view, String url) {
-        return false;
+    @Override
+    public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+        var url = request.getUrl();
+        if ("discord.com".equals(url.getAuthority()) || "about:blank".equals(url.toString())) {
+            return false;
+        }
+
+        Intent intent = new Intent(Intent.ACTION_VIEW, url);
+        view.getContext().startActivity(intent);
+        return true;
     }
 
     @Override
