@@ -25,6 +25,9 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // https://developer.chrome.com/docs/devtools/remote-debugging/webviews/
+        WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
+
         setContentView(R.layout.activity_main);
 
         wv = findViewById(R.id.webview);
