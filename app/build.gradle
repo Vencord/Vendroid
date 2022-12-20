@@ -14,16 +14,6 @@ android {
         versionName "1.0"
     }
 
-    signingConfigs {
-        release {
-            // Add these in ~/.gradle/gradle.properties
-            storeFile file(KEYSTORE_FILE)
-            storePassword KEYSTORE_PASSWORD
-            keyAlias KEYSTORE_ALIAS
-            keyPassword KEYSTORE_PASSWORD
-        }
-    }
-
     buildTypes {
         debug {
             applicationIdSuffix ".dbg"

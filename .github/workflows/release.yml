@@ -24,29 +24,28 @@ jobs:
       - name: Setup credentials
         run: |
           base64 -d <<< "$KEYSTORE_BASE64" > $HOME/keystore.jks
-          
-          mkdir -p ~/.gradle
-          cat > ~/.gradle/gradle.properties << EOF
-          KEYSTORE_FILE=$HOME/keystore.jks
-          KEYSTORE_ALIAS=$KEYSTORE_ALIAS
-          KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD
-          EOF
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-          KEYSTORE_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
       
       - name: Get some values needed for the release
         id: release_values
         run: |
           echo "release_tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
           
-      - name: Build
+      - name: Build Release
         run: |
           chmod +x ./gradlew
-          ./gradlew app:assembleRelease
+          ./gradlew app:assembleRelease \
+            -Pandroid.injected.signing.store.file="$HOME/keystore.jks" \
+            -Pandroid.injected.signing.store.password="$KEYSTORE_PASSWORD" \
+            -Pandroid.injected.signing.key.alias="$KEY_ALIAS" \
+            -Pandroid.injected.signing.key.password="$KEY_PASSWORD"
+          
           mv app/build/outputs/apk/release/app-release.apk Vencord-$TAG.apk
           gh release create $TAG --generate-notes --title "Vencord $TAG" Vencord-$TAG.apk
         env:
           TAG: ${{ env.release_tag }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          KEY_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
