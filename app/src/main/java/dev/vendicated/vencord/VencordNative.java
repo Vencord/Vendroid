@@ -19,6 +19,7 @@ public class VencordNative {
             if (wv.canGoBack())
                 wv.goBack();
             else
+                // no idea what i was smoking when I wrote this
                 activity.getActionBar();
         });
     }

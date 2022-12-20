@@ -62,7 +62,10 @@ public class MainActivity extends Activity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK && wv != null) {
-            runOnUiThread(() -> wv.evaluateJavascript("VencordMobile.onBackPress()", null));
+            runOnUiThread(() -> wv.evaluateJavascript("VencordMobile.onBackPress()", r -> {
+                if ("false".equals(r))
+                    this.onBackPressed ();
+            }));
             return true;
         }
         return super.onKeyDown(keyCode, event);
