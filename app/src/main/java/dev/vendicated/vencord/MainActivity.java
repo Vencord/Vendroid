@@ -114,12 +114,11 @@ public class MainActivity extends Activity {
 
     public void handleUrl(Uri url) {
         if (url != null) {
-            if (!url.getAuthority().contains("discord")) return;
+            if (!url.getAuthority().equals("discord.com")) return;
             if (!wvInitialized) {
                 wv.loadUrl(url.toString());
             } else {
-                wv.evaluateJavascript("Vencord.Webpack.Common.NavigationRouter.transitionTo(\"" + url.getPath() + "\")", (result) -> {
-                });
+                wv.evaluateJavascript("Vencord.Webpack.Common.NavigationRouter.transitionTo(\"" + url.getPath() + "\")", null);
             }
         }
     }
@@ -130,5 +129,4 @@ public class MainActivity extends Activity {
         Uri data = intent.getData();
         if (data != null) handleUrl(data);
     }
-
 }

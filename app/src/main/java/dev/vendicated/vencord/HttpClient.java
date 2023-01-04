@@ -11,8 +11,6 @@ import java.net.URL;
 import java.util.Locale;
 
 public class HttpClient {
-    public static final String VENCORD_BUNDLE_URL = "https://github.com/Vendicated/Vencord/releases/download/devbuild/browser.js";
-
     public static final class HttpException extends IOException {
         private final HttpURLConnection conn;
         private String message;
@@ -53,7 +51,7 @@ public class HttpClient {
             VencordMobileRuntime = readAsText(is);
         }
 
-        var conn = fetch(VENCORD_BUNDLE_URL);
+        var conn = fetch(Constants.JS_BUNDLE_URL);
         try (var is = conn.getInputStream()) {
             VencordRuntime = readAsText(is);
         }

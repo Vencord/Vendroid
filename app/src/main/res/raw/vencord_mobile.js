@@ -34,4 +34,13 @@
             return false;
         }
     };
+
+    document.addEventListener("DOMContentLoaded", () => document.documentElement.appendChild(
+        Object.assign(document.createElement("link"), {
+            rel: "stylesheet",
+            type: "text/css",
+            href: "https://github.com/Vendicated/Vencord/releases/download/devbuild/browser.css"
+        }),
+        { once: true }
+    ));
 })();
