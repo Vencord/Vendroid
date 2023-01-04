@@ -41,7 +41,7 @@ public class VWebviewClient extends WebViewClient {
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest req) {
         var uri = req.getUrl();
-        if (req.isForMainFrame() || req.getUrl().getHost().equals("raw.githubusercontent.com") && req.getUrl().getPath().endsWith(".css")) {
+        if (req.isForMainFrame() || req.getUrl().getPath().endsWith(".css")) {
             try {
                 return doFetch(req);
             } catch (IOException ex) {
@@ -71,6 +71,6 @@ public class VWebviewClient extends WebViewClient {
         }
         if (url.endsWith(".css")) modifiedHeaders.put("Content-Type", "text/css");
 
-        return new WebResourceResponse(conn.getHeaderField("Content-Type"), "utf-8", code, msg, modifiedHeaders, conn.getInputStream());
+        return new WebResourceResponse(modifiedHeaders.getOrDefault("Content-Type", "application/octet-stream"), "utf-8", code, msg, modifiedHeaders, conn.getInputStream());
     }
 }
