@@ -10,7 +10,7 @@ Vendroid is a custom Discord client for Android. The way it works is that it loa
 
 Discord's mobile site is not very usable since it has many issues. As such, this is mostly just a proof of concept and is not really maintained.
 
-You are likely better off using [Aliucord](https://github.com/Aliucord/Aliucord), that are proper mods of the old and new Discord Android app respectively
+You are likely better off using [Aliucord](https://github.com/Aliucord/Aliucord), that is proper mods of the Discord Android app respectively
 
 ## Download
 
