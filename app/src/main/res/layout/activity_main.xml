@@ -6,13 +6,35 @@
     tools:context=".MainActivity">
 
     <LinearLayout
+        android:id="@+id/loading_screen"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"></LinearLayout>
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <pl.droidsonroids.gif.GifImageView
+            android:layout_width="wrap_content"
+            android:layout_height="232dp"
+            android:scaleX="1"
+            android:scaleY="1"
+            android:src="@drawable/viggy" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="20dp"
+            android:text="Loading Vendroid..."
+            android:textAppearance="@android:style/TextAppearance.Material.Display1"
+            android:textColor="?android:attr/colorForeground"
+            android:textSize="24sp" />
+
+    </LinearLayout>
 
     <WebView
         android:id="@+id/webview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="invisible" />
+
 </android.widget.RelativeLayout>
