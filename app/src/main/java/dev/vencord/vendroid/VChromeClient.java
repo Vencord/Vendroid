@@ -1,6 +1,5 @@
-package dev.vendicated.vencord;
+package dev.vencord.vendroid;
 
-import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.net.Uri;
 import android.webkit.*;

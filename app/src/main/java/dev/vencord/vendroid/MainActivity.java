@@ -1,4 +1,4 @@
-package dev.vendicated.vencord;
+package dev.vencord.vendroid;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;

@@ -1,7 +1,6 @@
-package dev.vendicated.vencord;
+package dev.vencord.vendroid;
 
 import android.app.Activity;
-import android.content.res.Resources;
 
 import androidx.annotation.NonNull;
 

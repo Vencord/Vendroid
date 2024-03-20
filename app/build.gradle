@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace 'dev.vendicated.vencord'
+    namespace 'dev.vencord.vendroid'
     compileSdk 33
 
     defaultConfig {
-        applicationId "dev.vendicated.vencord"
+        applicationId "dev.vencord.vendroid"
         minSdk 21
         targetSdk 33
         versionCode 3

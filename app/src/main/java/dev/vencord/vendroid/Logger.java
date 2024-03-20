@@ -1,4 +1,4 @@
-package dev.vendicated.vencord;
+package dev.vencord.vendroid;
 
 import android.util.Log;
 
