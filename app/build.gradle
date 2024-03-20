@@ -4,12 +4,12 @@ plugins {
 
 android {
     namespace 'dev.vencord.vendroid'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "dev.vencord.vendroid"
         minSdk 21
-        targetSdk 33
+        targetSdk 34
         versionCode 3
         versionName "1.0"
     }
@@ -30,6 +30,7 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.annotation:annotation:1.5.0'
+    implementation 'androidx.annotation:annotation:1.7.1'
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.28'
 }
 

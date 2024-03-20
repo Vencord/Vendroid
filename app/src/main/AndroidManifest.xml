@@ -11,7 +11,7 @@
         android:allowBackup="true"
         android:supportsRtl="true"
         android:theme="@style/LoadingTheme"
-        tools:targetApi="31"
+        tools:targetApi="34"
         >
         <activity
             android:name=".MainActivity"
