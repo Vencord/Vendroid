@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Vendroid</string>
+    <string name="splashscreen_text">Loading Vendroid&#8230;</string>
 </resources>

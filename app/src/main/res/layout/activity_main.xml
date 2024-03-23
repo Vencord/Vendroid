@@ -24,10 +24,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="20dp"
-            android:text="Loading Vendroid..."
-            android:textAppearance="@android:style/TextAppearance.Material.Display1"
-            android:textColor="?android:attr/colorForeground"
-            android:textSize="24sp" />
+            android:text="@string/splashscreen_text"
+            android:textColor="@color/splash_text"
+            android:textSize="22sp" />
 
     </LinearLayout>
 
