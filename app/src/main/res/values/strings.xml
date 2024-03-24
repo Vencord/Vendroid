@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Vendroid</string>
     <string name="splashscreen_text">Loading Vendroid&#8230;</string>
+    <string name="autocheck_vencord">Automatically update Vencord (Coming soon)</string>
+    <string name="autocheck_vendroid">Automatically check for Vendroid updates</string>
+    <string name="updates_title">Updates</string>
 </resources>

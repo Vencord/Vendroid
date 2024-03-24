@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="20dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/updates_title"
+                android:textColor="@color/splash_text"
+                android:textSize="18sp" />
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/check_vendroid_updates"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:checked="true"
+                android:text="@string/autocheck_vendroid" />
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/autoupdate_vencord"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:checked="true"
+                android:enabled="false"
+                android:text="@string/autocheck_vencord" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Discord branch"
+                android:textColor="@color/splash_text"
+                android:textSize="18sp" />
+
+            <RadioGroup
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+
+                <RadioButton
+                    android:id="@+id/stable"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="Stable" />
+
+                <RadioButton
+                    android:id="@+id/ptb"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="PTB" />
+
+                <RadioButton
+                    android:id="@+id/canary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Canary" />
+            </RadioGroup>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Vencord location"
+                android:textColor="@color/splash_text"
+                android:textSize="18sp" />
+
+            <CheckBox
+                android:id="@+id/allow_custom_location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Set custom location (Only check this if you know what you're doing!)" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Custom location URL">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/custom_location"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+
+
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent">
+
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            style="?attr/collapsingToolbarLayoutLargeStyle"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/collapsingToolbarLayoutLargeSize"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+            app:contentScrim="?attr/colorSurfaceContainer">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:title="Welcome to Vendroid"
+                app:layout_collapseMode="pin"
+            android:elevation="0dp" />
+
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/start_vendroid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
+        android:contentDescription="Start Vendroid"
+        android:text="Start Vendroid"
+        app:icon="@drawable/baseline_check_24" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

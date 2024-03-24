@@ -5,28 +5,34 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:label="@string/app_name"
-        android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/LoadingTheme"
-        tools:targetApi="34"
-        >
+        tools:targetApi="34">
+        <activity
+            android:name=".WelcomeActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
         <activity
             android:name=".MainActivity"
-            android:exported="true"
             android:configChanges="orientation|keyboardHidden|screenSize|layoutDirection"
+            android:exported="true"
             android:launchMode="singleTask"
             android:theme="@style/LoadingTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:scheme="https" />
                 <data android:scheme="http" />
                 <data android:host="discord.com" />
