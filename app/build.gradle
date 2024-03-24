@@ -1,15 +1,14 @@
 plugins {
     id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
 }
 
 android {
-    namespace 'com.nin0dev.vendroid'
+    namespace 'dev.vencord.vendroid'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.nin0dev.vendroid"
-        minSdk 24
+        applicationId "dev.vencord.vendroid"
+        minSdk 21
         targetSdk 34
         versionCode 3
         versionName "1.0"
@@ -25,21 +24,13 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
-    }
-    kotlinOptions {
-        jvmTarget = '17'
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 }
 
 dependencies {
     implementation 'androidx.annotation:annotation:1.7.1'
     implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.28'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.10.0'
-    implementation 'androidx.activity:activity:1.8.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'androidx.core:core-ktx:+'
 }
 
