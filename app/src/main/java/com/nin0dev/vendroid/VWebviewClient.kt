@@ -37,9 +37,9 @@ class VWebviewClient : WebViewClient() {
         val uri = req.url
         if (req.isForMainFrame || req.url.path!!.endsWith(".css")) {
             try {
-                return doFetch(req)
+                return null
             } catch (ex: IOException) {
-                e("Error during shouldInterceptRequest", ex)
+                //e("Error during shouldInterceptRequest", ex)
             }
         }
         return null
