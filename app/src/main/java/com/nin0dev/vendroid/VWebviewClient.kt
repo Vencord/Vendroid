@@ -2,11 +2,13 @@ package com.nin0dev.vendroid
 
 import android.content.Intent
 import android.graphics.Bitmap
+import android.os.Build
 import android.view.View
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.annotation.RequiresApi
 import com.nin0dev.vendroid.Logger.e
 import java.io.IOException
 import java.net.HttpURLConnection
@@ -33,11 +35,12 @@ class VWebviewClient : WebViewClient() {
         super.onPageFinished(view, url)
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun shouldInterceptRequest(view: WebView, req: WebResourceRequest): WebResourceResponse? {
         val uri = req.url
         if (req.isForMainFrame || req.url.path!!.endsWith(".css")) {
             try {
-                return null
+                return doFetch(req)
             } catch (ex: IOException) {
                 //e("Error during shouldInterceptRequest", ex)
             }
@@ -45,24 +48,31 @@ class VWebviewClient : WebViewClient() {
         return null
     }
 
-    @Throws(IOException::class)
-    private fun doFetch(req: WebResourceRequest): WebResourceResponse {
-        val url = req.url.toString()
-        val conn = URL(url).openConnection() as HttpURLConnection
-        conn.setRequestMethod(req.method)
-        for ((key, value) in req.requestHeaders) {
-            conn.setRequestProperty(key, value)
-        }
-        val code = conn.getResponseCode()
-        val msg = conn.getResponseMessage()
-        val headers = conn.headerFields
-        val modifiedHeaders = HashMap<String, String>(headers.size)
-        for ((key, value) in headers) {
-            if (!"Content-Security-Policy".equals(key, ignoreCase = true)) {
-                modifiedHeaders[key] = value[0]
+        @RequiresApi(Build.VERSION_CODES.N)
+        private fun doFetch(req: WebResourceRequest): WebResourceResponse {
+            val url = req.url.toString()
+            val conn = URL(url).openConnection() as HttpURLConnection
+            conn.setRequestMethod(req.method)
+            for ((key, value) in req.requestHeaders) {
+                conn.setRequestProperty(key, value)
             }
+            val code = conn.getResponseCode()
+            val msg = conn.getResponseMessage()
+            val headers = conn.headerFields
+            val modifiedHeaders = HashMap<String, String>(headers.size)
+            for ((key, valueList) in headers) {
+                if (key == null) {
+                    continue
+                }
+                if (!"Content-Security-Policy".equals(key, ignoreCase = true)) {
+                    if (valueList != null && valueList.isNotEmpty()) {
+                        val value = valueList[0]
+                        modifiedHeaders[key] = value
+                    }
+                }
+            }
+            if (url.endsWith(".css")) modifiedHeaders["Content-Type"] = "text/css"
+            val wong = modifiedHeaders.getOrDefault("Content-Type", "application/octet-stream")
+            return WebResourceResponse(wong, "utf-8", code, msg, modifiedHeaders, conn.inputStream)
         }
-        if (url.endsWith(".css")) modifiedHeaders["Content-Type"] = "text/css"
-        return WebResourceResponse(modifiedHeaders.getOrDefault("Content-Type", "application/octet-stream"), "utf-8", code, msg, modifiedHeaders, conn.inputStream)
-    }
 }
