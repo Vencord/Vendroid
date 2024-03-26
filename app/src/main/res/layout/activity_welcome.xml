@@ -3,7 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -34,14 +35,13 @@
                 android:layout_height="40dp"
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="5dp"
-                android:checked="true"
                 android:enabled="false"
                 android:text="@string/autocheck_vencord" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Discord branch"
+                android:text="@string/discord_branch"
                 android:textColor="@color/text"
                 android:textSize="18sp" />
 
@@ -54,25 +54,25 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:checked="true"
-                    android:text="Stable" />
+                    android:text="@string/stable" />
 
                 <RadioButton
                     android:id="@+id/ptb"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="PTB" />
+                    android:text="@string/ptb" />
 
                 <RadioButton
                     android:id="@+id/canary"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Canary" />
+                    android:text="@string/canary" />
             </RadioGroup>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Vencord location"
+                android:text="@string/vencord_location"
                 android:textColor="@color/text"
                 android:textSize="18sp" />
 
@@ -80,12 +80,13 @@
                 android:id="@+id/allow_custom_location"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Set custom location (Only check this if you know what you're doing!)" />
+                android:text="@string/set_custom_location" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Custom location URL">
+                android:fitsSystemWindows="true"
+                android:hint="@string/custom_location_url">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/custom_location"
