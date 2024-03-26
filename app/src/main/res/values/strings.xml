@@ -13,4 +13,6 @@
     <string name="vencord_location">Vencord location</string>
     <string name="set_custom_location">Set custom location (Only check this if you know what you\'re doing!)</string>
     <string name="custom_location_url">Custom location URL</string>
+    <string name="no">No</string>
+    <string name="yes">Yes</string>
 </resources>
