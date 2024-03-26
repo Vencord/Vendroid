@@ -6,4 +6,11 @@
     <string name="updates_title">Updates</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="discord_branch">Discord branch</string>
+    <string name="stable">Stable</string>
+    <string name="ptb">PTB</string>
+    <string name="canary">Canary</string>
+    <string name="vencord_location">Vencord location</string>
+    <string name="set_custom_location">Set custom location (Only check this if you know what you\'re doing!)</string>
+    <string name="custom_location_url">Custom location URL</string>
 </resources>
