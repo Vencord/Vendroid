@@ -19,7 +19,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/updates_title"
-                android:textColor="@color/splash_text"
                 android:textSize="18sp" />
 
             <com.google.android.material.materialswitch.MaterialSwitch
@@ -43,7 +42,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Discord branch"
-                android:textColor="@color/splash_text"
+                android:textColor="@color/text"
                 android:textSize="18sp" />
 
             <RadioGroup
@@ -74,7 +73,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Vencord location"
-                android:textColor="@color/splash_text"
+                android:textColor="@color/text"
                 android:textSize="18sp" />
 
             <CheckBox
@@ -117,9 +116,10 @@
             <com.google.android.material.appbar.MaterialToolbar
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:title="Welcome to Vendroid"
+                android:elevation="0dp"
                 app:layout_collapseMode="pin"
-            android:elevation="0dp" />
+                app:title="Welcome to Vendroid"
+                app:titleTextColor="@color/text" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
