@@ -2,6 +2,7 @@ package com.nin0dev.vendroid
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -23,7 +24,9 @@ class MainActivity : Activity() {
     @SuppressLint("SetJavaScriptEnabled") // mad? watch this swag
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val sPrefs = getSharedPreferences("settings", Context.MODE_PRIVATE)
         startActivity(Intent(this@MainActivity, WelcomeActivity::class.java))
+        finishActivity(0)
         // https://developer.chrome.com/docs/devtools/remote-debugging/webviews/
         WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
         setContentView(R.layout.activity_main)
@@ -46,7 +49,13 @@ class MainActivity : Activity() {
             val data = intent.data
             if (data != null) handleUrl(intent.data)
         } else {
-            wv!!.loadUrl("https://discord.com/app")
+            if (sPrefs.getString("discordBranch", "") == "stable") wv!!.loadUrl("https://discord.com/app")
+            else if (sPrefs.getString("discordBranch", "") == "ptb") wv!!.loadUrl("https://ptb.discord.com/app")
+            else if (sPrefs.getString("discordBranch", "") == "canary") wv!!.loadUrl("https://canary.discord.com/app")
+            else {
+                startActivity(Intent(this@MainActivity, WelcomeActivity::class.java))
+                finishActivity(0)
+            }
         }
         wvInitialized = true
     }
