@@ -1,6 +1,8 @@
 package com.nin0dev.vendroid
 
 import android.app.Activity
+import android.content.Context
+import android.content.SharedPreferences
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
@@ -16,10 +18,11 @@ object HttpClient {
     @JvmStatic
     @Throws(IOException::class)
     fun fetchVencord(activity: Activity) {
+        val sPrefs = activity.getSharedPreferences("settings", Context.MODE_PRIVATE)
         if (VencordRuntime != null) return
         val res = activity.resources
         res.openRawResource(R.raw.vencord_mobile).use { `is` -> VencordMobileRuntime = readAsText(`is`) }
-        val conn = fetch(Constants.JS_BUNDLE_URL)
+        val conn = fetch(sPrefs.getString("vencordLocation", Constants.JS_BUNDLE_URL)!!)
         conn.inputStream.use { `is` -> VencordRuntime = readAsText(`is`) }
     }
 

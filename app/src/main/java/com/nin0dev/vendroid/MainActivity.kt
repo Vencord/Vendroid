@@ -4,11 +4,13 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
 import android.view.KeyEvent
+import android.view.WindowManager
 import android.webkit.ValueCallback
 import android.webkit.WebView
 import com.nin0dev.vendroid.HttpClient.fetchVencord
@@ -24,9 +26,11 @@ class MainActivity : Activity() {
     @SuppressLint("SetJavaScriptEnabled") // mad? watch this swag
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+        window.statusBarColor = Color.TRANSPARENT
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
+        window.navigationBarColor = Color.TRANSPARENT
         val sPrefs = getSharedPreferences("settings", Context.MODE_PRIVATE)
-        startActivity(Intent(this@MainActivity, WelcomeActivity::class.java))
-        finishActivity(0)
         // https://developer.chrome.com/docs/devtools/remote-debugging/webviews/
         WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
         setContentView(R.layout.activity_main)
