@@ -7,10 +7,8 @@ body:
   - type: markdown
     attributes:
       value: |
-        # READ THIS BEFORE OPENING AN ISSUE
-
         > [!WARNING]
-        > ONLY OPEN AN ISSUE IF:
+        > ## ONLY OPEN AN ISSUE IF:
         > * You are using an up-to-date version of VendroidEnhanced
         > * You **did not** edit the Vencord location in app settings
         > * You are using Discord Stable, not PTB or Canary.
