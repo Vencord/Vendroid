@@ -12,9 +12,9 @@ body:
         > * You are using an up-to-date version of VendroidEnhanced
         > * You **did not** edit the Vencord location in app settings
         > * You are using Discord Stable, not PTB or Canary.
-        > * You could not reproduce the issue on:
-        >  * Vencord Web, Vesktop, or ArmCord, on a computer
-        >  * The Discord mobile website (`discord.com/app`) on a mobile browser WITHOUT VENCORD
+        > * You **could not** reproduce the issue on:
+        >   * Vencord Web, Vesktop, or ArmCord, on a computer
+        >   * The Discord mobile website (`discord.com/app`) on a mobile browser WITHOUT VENCORD
         >
         > **Your issue will get closed and you will possibly be blocked from the repository if you cannot read this!**
   
