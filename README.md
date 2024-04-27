@@ -1,4 +1,7 @@
 # Vendroid
+> [!IMPORTANT]
+> This isn't released yet. It will soon be when I'll have more time for myself.
+
 > [!WARNING]
 > This app is still in beta. Before reporting a bug to Vencord support, please attempt to reproduce the bug on:
 > - A mobile browser without Vencord by opening `discord.com/app`
@@ -23,6 +26,18 @@ However, if you currently want to use a mobile mod, you can use [Aliucord](https
 ## Roadmap
 
 You can find a roadmap of upcoming features [here](https://github.com/users/nin0-dev/projects/1). You can make issues in this repo to suggest features.
+
+## Star history
+
+If you like the project please star it, it would mean a lot to me!
+
+<a href="https://star-history.com/#VendroidEnhanced/Vendroid&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=VendroidEnhanced/Vendroid&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=VendroidEnhanced/Vendroid&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=VendroidEnhanced/Vendroid&type=Date" />
+ </picture>
+</a>
 
 ## Download
 

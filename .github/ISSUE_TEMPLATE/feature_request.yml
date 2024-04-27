@@ -1,0 +1,30 @@
+name: Feature Request
+description: Request a Vendroid-specific feature.
+labels: [enhancement]
+title: "[Bug] <title>"
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > [!INFO]
+        > This is not for requesting plugins that should be available outside of Vendroid.
+
+  - type: textarea
+    id: feature-desc
+    attributes:
+      label: Feature description
+      description: Describe the feature in detail.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: agreement-check
+    attributes:
+      label: Request agreement
+      description: Make sure that
+      options:
+        - label: I am not suggesting a feature that could be selfbotting (automating/bulk sending actions)
+          required: true
+        - label: I have checked for duplicates in the repo
+          required: true
