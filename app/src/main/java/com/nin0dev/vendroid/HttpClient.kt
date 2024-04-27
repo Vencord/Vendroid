@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.net.HttpURLConnection
@@ -19,15 +20,25 @@ object HttpClient {
     @Throws(IOException::class)
     fun fetchVencord(activity: Activity) {
         val sPrefs = activity.getSharedPreferences("settings", Context.MODE_PRIVATE)
-        if (VencordRuntime != null) return
+        var vendroidFile = File(activity.filesDir, "vencord.js")
         val res = activity.resources
         res.openRawResource(R.raw.vencord_mobile).use { `is` -> VencordMobileRuntime = readAsText(`is`) }
-        val conn = fetch(sPrefs.getString("vencordLocation", Constants.JS_BUNDLE_URL)!!)
-        conn.inputStream.use { `is` -> VencordRuntime = readAsText(`is`) }
+        if (VencordRuntime != null) return
+        if (sPrefs.getString("vencordLocation", Constants.JS_BUNDLE_URL) == Constants.JS_BUNDLE_URL || BuildConfig.DEBUG) { // user is debugging vencord or app, always redownload
+            vendroidFile.delete()
+        }
+        if (vendroidFile.exists()) {
+            VencordRuntime = vendroidFile.readText()
+        }
+        else {
+            val conn = fetch(sPrefs.getString("vencordLocation", Constants.JS_BUNDLE_URL)!!)
+            vendroidFile.writeText(readAsText(conn.inputStream))
+            VencordRuntime = vendroidFile.readText()
+        }
     }
 
     @Throws(IOException::class)
-    private fun fetch(url: String): HttpURLConnection {
+    fun fetch(url: String): HttpURLConnection {
         val conn = URL(url).openConnection() as HttpURLConnection
         if (conn.getResponseCode() >= 300) {
             throw HttpException(conn)
@@ -36,7 +47,7 @@ object HttpClient {
     }
 
     @Throws(IOException::class)
-    private fun readAsText(`is`: InputStream): String {
+    fun readAsText(`is`: InputStream): String {
         ByteArrayOutputStream().use { baos ->
             var n: Int
             val buf = ByteArray(16384) // 16 KB

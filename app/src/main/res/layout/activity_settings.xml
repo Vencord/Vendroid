@@ -122,7 +122,7 @@
                 android:layout_height="?attr/actionBarSize"
                 android:elevation="0dp"
                 app:layout_collapseMode="pin"
-                app:title="Welcome to Vendroid"
+                app:title="Vendroid Settings"
                 app:titleTextColor="@color/text" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
@@ -137,7 +137,7 @@
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="20dp"
         android:contentDescription="Start Vendroid"
-        android:text="Start Vendroid"
-        app:icon="@drawable/baseline_check_24" />
+        android:text="Save settings"
+        app:icon="@drawable/save_black_24dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

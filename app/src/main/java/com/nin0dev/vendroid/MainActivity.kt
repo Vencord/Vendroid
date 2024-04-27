@@ -122,6 +122,12 @@ class MainActivity : Activity() {
         data?.let { handleUrl(it) }
     }
 
+    fun showDiscordToast(message: String, type: String) {
+        wv?.post(Runnable {
+            wv?.evaluateJavascript("toasts=Vencord.Webpack.Common.Toasts; toasts.show({id: toasts.genId(), message: \"$message\", type: toasts.Type.$type, options: {position: toasts.Position.BOTTOM,}})", null) // NOBODY LIKES TOASTS AT THE TOP
+        })
+    }
+
     companion object {
         const val FILECHOOSER_RESULTCODE = 8485
     }

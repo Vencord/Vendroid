@@ -1,22 +1,20 @@
 package com.nin0dev.vendroid
 
 import android.content.Context
-import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
-import android.view.View.GONE
-import android.view.View.VISIBLE
+import android.view.View
 import android.view.WindowManager
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.RadioButton
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.materialswitch.MaterialSwitch
 
-
-class WelcomeActivity : AppCompatActivity() {
+class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -25,7 +23,7 @@ class WelcomeActivity : AppCompatActivity() {
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
         window.navigationBarColor = Color.TRANSPARENT
 
-        setContentView(R.layout.activity_welcome)
+        setContentView(R.layout.activity_settings)
 
         val devbuildCheckbox = findViewById<CheckBox>(R.id.allow_custom_location)
         devbuildCheckbox.setOnClickListener {
@@ -37,12 +35,12 @@ class WelcomeActivity : AppCompatActivity() {
                             devbuildCheckbox.isChecked = false
                         }
                         .setPositiveButton(resources.getString(R.string.yes)) { _, _ ->
-                            findViewById<EditText>(R.id.custom_location).visibility = VISIBLE
+                            findViewById<EditText>(R.id.custom_location).visibility = View.VISIBLE
                         }
                         .show()
             }
             else {
-                findViewById<EditText>(R.id.custom_location).visibility = GONE
+                findViewById<EditText>(R.id.custom_location).visibility = View.GONE
             }
         }
 
@@ -57,7 +55,7 @@ class WelcomeActivity : AppCompatActivity() {
             if (findViewById<CheckBox>(R.id.allow_custom_location).isChecked && findViewById<EditText>(R.id.custom_location).text.isNotBlank()) editor.putString("vencordLocation", findViewById<EditText>(R.id.custom_location).text.toString())
 
             editor.apply()
-            startActivity(Intent(this@WelcomeActivity, MainActivity::class.java))
+            Toast.makeText(this, "Settings saved, restart Vendroid to apply them.", Toast.LENGTH_LONG).show()
             finish()
         }
     }
