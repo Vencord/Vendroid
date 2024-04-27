@@ -6,6 +6,10 @@ import android.content.Intent
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.widget.Toast
+import com.android.volley.Request
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.io.File
 
 class VencordNative(private val activity: MainActivity, private val wv: WebView) {
@@ -29,5 +33,10 @@ class VencordNative(private val activity: MainActivity, private val wv: WebView)
         val conn = HttpClient.fetch(sPrefs.getString("vencordLocation", Constants.JS_BUNDLE_URL)!!)
         vendroidFile.writeText(HttpClient.readAsText(conn.inputStream))
         activity.showDiscordToast("Updated Vencord, restart to apply changes!", "SUCCESS")
+    }
+
+    @JavascriptInterface
+    fun checkVendroidUpdates() {
+        activity.checkUpdates(ignoreSetting = true)
     }
 }

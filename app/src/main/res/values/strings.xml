@@ -15,4 +15,7 @@
     <string name="custom_location_url">Custom location URL</string>
     <string name="no">No</string>
     <string name="yes">Yes</string>
+    <string name="vendroid_update_available">Vendroid update available</string>
+    <string name="update">Update</string>
+    <string name="later">Later</string>
 </resources>

@@ -3,6 +3,7 @@ package com.nin0dev.vendroid
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
@@ -13,6 +14,11 @@ import android.view.KeyEvent
 import android.view.WindowManager
 import android.webkit.ValueCallback
 import android.webkit.WebView
+import android.widget.Toast
+import com.android.volley.Request
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.nin0dev.vendroid.HttpClient.fetchVencord
 import com.nin0dev.vendroid.Logger.e
 import java.io.IOException
@@ -23,9 +29,41 @@ class MainActivity : Activity() {
     @JvmField
     var filePathCallback: ValueCallback<Array<Uri?>?>? = null
 
+    fun checkUpdates(ignoreSetting: Boolean = false)
+    {
+        val sPrefs = getSharedPreferences("settings", Context.MODE_PRIVATE)
+        if(sPrefs.getBoolean("checkVendroidUpdates", false) || ignoreSetting) {
+            val queue = Volley.newRequestQueue(this)
+            val url = "https://raw.githubusercontent.com/VendroidEnhanced/UpdateTracker/main/vendroid"
+            val stringRequest = StringRequest(
+                    Request.Method.GET, url,
+                    { response ->
+                        if(response != BuildConfig.VERSION_CODE.toString())
+                        {
+                            val madb = MaterialAlertDialogBuilder(this)
+                            madb.setTitle(getString(R.string.vendroid_update_available))
+                            madb.setMessage("To make sure that no unexpected bugs happen, it is recommended to update.")
+                            madb.setPositiveButton(getString(R.string.update), DialogInterface.OnClickListener { dialogInterface, i ->
+                                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/VendroidEnhanced/Vendroid/releases/latest/download/app-release.apk"))
+                                startActivity(browserIntent)
+                            })
+                            madb.setNegativeButton(getString(R.string.later), DialogInterface.OnClickListener { _, _ ->  })
+                            madb.show()
+                        }
+                        if(ignoreSetting && response == BuildConfig.VERSION_CODE.toString()) {
+                            showDiscordToast("No updates available", "MESSAGE")
+                        }
+                    },
+                    { })
+            stringRequest.setShouldCache(false);
+            queue.add(stringRequest)
+        }
+    }
+
     @SuppressLint("SetJavaScriptEnabled") // mad? watch this swag
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
         window.statusBarColor = Color.TRANSPARENT
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
@@ -61,6 +99,7 @@ class MainActivity : Activity() {
                 finishActivity(0)
             }
         }
+        checkUpdates()
         wvInitialized = true
     }
 
