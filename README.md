@@ -1,6 +1,4 @@
 # Vendroid
-> [!IMPORTANT]
-> This isn't released yet. It will soon be when I'll have more time for myself.
 
 > [!WARNING]
 > This app is still in beta. Before reporting a bug to Vencord support, please attempt to reproduce the bug on:
