@@ -30,7 +30,7 @@ However, if you currently want to use a mobile mod, you can use [Aliucord](https
 
 ## Roadmap
 
-You can find a roadmap of upcoming features [here](https://github.com/users/nin0-dev/projects/1). You can make issues in this repo to suggest features.
+You can find a roadmap of upcoming features [here](https://github.com/orgs/VendroidEnhanced/projects/1). You can make issues in this repo to suggest features.
 
 ## Star history
 
