@@ -32,10 +32,10 @@ jobs:
       - name: Build gradle project
         run: ./gradlew build
 
-      - name: Build apk debug project (APK) - ${{ env.main_project_module }} module
+      - name: Build APK
         run: ./gradlew assembleDebug
 
-      - name: Upload APK Debug - ${{ env.repository_name }}
+      - name: Upload APK
         uses: actions/upload-artifact@v3
         with:
           name: app
