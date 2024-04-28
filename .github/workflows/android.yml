@@ -39,4 +39,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: app
-          path: ${{ env.main_project_module }}/build/outputs/apk/
+          path: ${{ env.main_project_module }}/build/outputs/apk/debug/
