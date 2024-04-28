@@ -1,4 +1,4 @@
-# VendroidEnhanced
+# Vendroid
 
 > [!WARNING]
 > This app is still in beta. Before reporting a bug to Vencord support, please attempt to reproduce the bug on:
