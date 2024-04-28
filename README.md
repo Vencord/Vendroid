@@ -23,6 +23,10 @@ As the Discord website has some annoying bugs, this app isn't 100% stable. I (ni
 
 However, if you currently want to use a mobile mod, you can use [Aliucord](https://github.com/Aliucord/Aliucord), which is based on the pre-React Native version of Discord or [Bunny](https://github.com/pyoncord/Pyoncord), that is a Vendetta fork.
 
+## Download
+
+[Here!](https://github.com/VendroidEnhanced/Vendroid/releases/latest/download/app-release.apk)
+
 ## Roadmap
 
 You can find a roadmap of upcoming features [here](https://github.com/users/nin0-dev/projects/1). You can make issues in this repo to suggest features.
@@ -38,7 +42,3 @@ If you like the project please star it, it would mean a lot to me!
    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=VendroidEnhanced/Vendroid&type=Date" />
  </picture>
 </a>
-
-## Download
-
-Soon™
