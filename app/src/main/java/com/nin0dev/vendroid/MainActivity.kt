@@ -38,7 +38,7 @@ class MainActivity : Activity() {
             val stringRequest = StringRequest(
                     Request.Method.GET, url,
                     { response ->
-                        if(response != BuildConfig.VERSION_CODE.toString())
+                        if(Integer.parseInt(response.trim()) != BuildConfig.VERSION_CODE)
                         {
                             val madb = MaterialAlertDialogBuilder(this)
                             madb.setTitle(getString(R.string.vendroid_update_available))
@@ -50,7 +50,7 @@ class MainActivity : Activity() {
                             madb.setNegativeButton(getString(R.string.later), DialogInterface.OnClickListener { _, _ ->  })
                             madb.show()
                         }
-                        if(ignoreSetting && response == BuildConfig.VERSION_CODE.toString()) {
+                        if(ignoreSetting && Integer.parseInt(response.trim()) == BuildConfig.VERSION_CODE) {
                             showDiscordToast("No updates available", "MESSAGE")
                         }
                     },
