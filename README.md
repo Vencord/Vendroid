@@ -31,7 +31,7 @@ However, if you currently want to use a mobile mod, you can use [Aliucord](https
 ## Build
 
 > [!WARNING]
-> After finishing the setup wizard, Discord may not load. This only happens at that moment, you have to restart the app to load Discord.
+> Only do this if you made changes to the app's code. If you're looking for prebuilt APKs, check the Download section.
 
 Open the project with Android Studio and open the "Build" drop menu, then hover over "Build Bundle(s) / APK(s)" and hit "Build APK(s)". Done!
 
