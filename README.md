@@ -28,6 +28,13 @@ However, if you currently want to use a mobile mod, you can use [Aliucord](https
 
 [Here!](https://github.com/VendroidEnhanced/Vendroid/releases/latest/download/app-release.apk)
 
+## Build
+
+> [!WARNING]
+> After finishing the setup wizard, Discord may not load. This only happens at that moment, you have to restart the app to load Discord.
+
+Open the project with Android Studio and open the "Build" drop menu, then hover over "Build Bundle(s) / APK(s)" and hit "Build APK(s)". Done!
+
 ## Roadmap
 
 You can find a roadmap of upcoming features [here](https://github.com/orgs/VendroidEnhanced/projects/1). You can make issues in this repo to suggest features.
