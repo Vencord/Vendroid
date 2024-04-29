@@ -24,7 +24,7 @@ However, if you currently want to use a mobile mod, you can use [Aliucord](https
 ## Download
 
 > [!WARNING]
-> Always check the Actions tab first, as it contains the latest versions of the app. After finishing the setup wizard, Discord may not load. This only happens at that moment, you have to restart the app to load Discord.
+> After finishing the setup wizard, Discord may not load. This only happens at that moment, you have to restart the app to load Discord.
 
 [Here!](https://github.com/VendroidEnhanced/Vendroid/releases/latest/download/app-release.apk)
 
