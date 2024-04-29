@@ -9,7 +9,7 @@
 > 
 > If the issue happens on neither of these two, the issue is with Vendroid and you can open an issue in this repo. 
 
-Vendroid is a custom Discord client for Android. The way it works is that it loads the Discord mobile and injects Vencord.
+Vendroid is a custom Discord client for Android. The way it works is that it loads the Discord mobile website and injects Vencord.
 
 | | |
 |:--:|:--:|
