@@ -1,13 +1,13 @@
 name: Feature Request
 description: Request a Vendroid-specific feature.
 labels: [enhancement]
-title: "[Bug] <title>"
+title: "[FeatReq] <title>"
 
 body:
   - type: markdown
     attributes:
       value: |
-        > [!INFO]
+        > [!WARNING]
         > This is not for requesting plugins that should be available outside of Vendroid.
 
   - type: textarea
