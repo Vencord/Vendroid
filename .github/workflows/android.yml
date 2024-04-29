@@ -1,0 +1,43 @@
+name: Build APK
+
+env:
+  main_project_module: app
+
+on:
+
+  push:
+    branches:
+      - '*'
+      - '!main'
+
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set Up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Change wrapper permissions
+        run: chmod +x ./gradlew
+
+      - name: Build gradle project
+        run: ./gradlew build
+
+      - name: Build APK
+        run: ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: app
+          path: ${{ env.main_project_module }}/build/outputs/apk/debug/
