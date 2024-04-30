@@ -57,8 +57,8 @@ class WelcomeActivity : AppCompatActivity() {
             if (findViewById<CheckBox>(R.id.allow_custom_location).isChecked && findViewById<EditText>(R.id.custom_location).text.isNotBlank()) editor.putString("vencordLocation", findViewById<EditText>(R.id.custom_location).text.toString())
 
             editor.apply()
-            startActivity(Intent(this@WelcomeActivity, MainActivity::class.java))
             finish()
+            startActivity(Intent(this@WelcomeActivity, MainActivity::class.java))
         }
     }
 }

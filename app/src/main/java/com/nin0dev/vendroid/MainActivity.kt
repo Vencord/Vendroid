@@ -95,8 +95,8 @@ class MainActivity : Activity() {
             else if (sPrefs.getString("discordBranch", "") == "ptb") wv!!.loadUrl("https://ptb.discord.com/app")
             else if (sPrefs.getString("discordBranch", "") == "canary") wv!!.loadUrl("https://canary.discord.com/app")
             else {
+                finish()
                 startActivity(Intent(this@MainActivity, WelcomeActivity::class.java))
-                finishActivity(0)
             }
         }
         checkUpdates()
@@ -146,7 +146,7 @@ class MainActivity : Activity() {
 
     fun handleUrl(url: Uri?) {
         if (url != null) {
-            if (url.authority != "discord.com") return
+            if (url.authority != "discord.com" || url.authority != "ptb.discord.com" || url.authority != "canary.discord.com") return
             if (!wvInitialized) {
                 wv!!.loadUrl(url.toString())
             } else {
