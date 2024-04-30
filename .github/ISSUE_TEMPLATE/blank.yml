@@ -1,69 +1,22 @@
-description: "Open a blank issue."
-labels: [bug]
-title: "[Bug] <title>"
+description: Open a blank issue. Only for contributors or if explicitly allowed by one.
+title: "<title>"
 
 body:
   - type: markdown
-      attributes:
-            value: |
-                    > [!WARNING]
-                            > ## ONLY OPEN AN ISSUE IF:
-                                    > * You are using an up-to-date version of VendroidEnhanced
-                                            > * You **did not** edit the Vencord location in app settings
-                                                    > * You are using Discord Stable, not PTB or Canary.
-                                                            > * You **could not** reproduce the issue on:
-                                                                    >   * Vencord Web, Vesktop, or ArmCord, on a computer
-                                                                            >   * The Discord mobile website (`discord.com/app`) on a mobile browser WITHOUT VENCORD
-                                                                                    >
-                                                                                            > **Your issue will get closed and you will possibly be blocked from the repository if you cannot read this!**
-                                                                                              
-                                                                                                - type: input
-                                                                                                    id: discord
-                                                                                                        attributes:
-                                                                                                              label: Discord account
-                                                                                                                    description: Who on Discord is making this request? Not required but encouraged for easier follow-up.
-                                                                                                                          placeholder: username
-                                                                                                                              validations:
-                                                                                                                                    required: false
+    attributes:
+      value: |
+        > [!CAUTION]
+        > ## ONLY OPEN A BLANK ISSUE if you:
+        > - are a VendroidEnhanced contributor
+        > - are a Vencord (upstream) contributor
+        > - were explicitly told to do so by a contributor or org member.
+        > If you don't meet the conditions, please use the other templates.
+        >
+        > **If you open a blank issue without meeting these conditions, you will be blocked from the repository.**
 
-                                                                                                                                      - type: textarea
-                                                                                                                                          id: bug-description
-                                                                                                                                              attributes:
-                                                                                                                                                    label: What happens when the bug or crash occurs?
-                                                                                                                                                          description: Where does this bug or crash occur, when does it occur, etc.
-                                                                                                                                                                placeholder: The bug/crash happens sometimes when I do ..., causing this to not work/the app to crash. I think it happens because of ...
-                                                                                                                                                                    validations:
-                                                                                                                                                                          required: true
-
-                                                                                                                                                                            - type: textarea
-                                                                                                                                                                                id: expected-behaviour
-                                                                                                                                                                                    attributes:
-                                                                                                                                                                                          label: What is the expected behaviour?
-                                                                                                                                                                                                description: Simply detail what the expected behaviour is.
-                                                                                                                                                                                                      placeholder: I expect Vendroid/Discord to open the ... page instead of ..., it prevents me from doing ...
-                                                                                                                                                                                                          validations:
-                                                                                                                                                                                                                required: true
-
-                                                                                                                                                                                                                  - type: textarea
-                                                                                                                                                                                                                      id: steps-to-take
-                                                                                                                                                                                                                          attributes:
-                                                                                                                                                                                                                                label: How do you recreate this bug or crash?
-                                                                                                                                                                                                                                      description: Give us a list of steps in order to recreate the bug or crash.
-                                                                                                                                                                                                                                            placeholder: |
-                                                                                                                                                                                                                                                    1. Do ...
-                                                                                                                                                                                                                                                            2. Then ...
-                                                                                                                                                                                                                                                                    3. Do this ..., ... and then ...
-                                                                                                                                                                                                                                                                            4. Observe "the bug" or "the crash"
-                                                                                                                                                                                                                                                                                validations:
-                                                                                                                                                                                                                                                                                      required: true
-
-                                                                                                                                                                                                                                                                                        - type: checkboxes
-                                                                                                                                                                                                                                                                                            id: agreement-check
-                                                                                                                                                                                                                                                                                                attributes:
-                                                                                                                                                                                                                                                                                                      label: Request agreement
-                                                                                                                                                                                                                                                                                                            description: We only accept reports for bugs that happen on Discord Stable. Canary and PTB are Development branches and may be unstable.
-                                                                                                                                                                                                                                                                                                                  options:
-                                                                                                                                                                                                                                                                                                                          - label: I am using Discord Stable or tried on Stable and this bug happens there as well
-                                                                                                                                                                                                                                                                                                                                    required: true
-                                                                                                                                                                                                                                                                                                                                            - label: I have read the requirements for opening an issue above
-                                                                                                                                                                                                                                                                                                                                                      
+  - type: textarea
+    id: description 
+    attributes:
+      label: Issue content
+    validations:
+      required: true
