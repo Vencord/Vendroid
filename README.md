@@ -23,6 +23,11 @@ However, if you currently want to use a mobile mod, you can use [Aliucord](https
 
 ## Download
 
+
+
+
+
+
 [Here!](https://github.com/VendroidEnhanced/Vendroid/releases/latest/download/app-release.apk)
 
 ## Build
