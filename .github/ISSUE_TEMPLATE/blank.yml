@@ -1,0 +1,23 @@
+name: Blank issue
+description: Open a blank issue. Only for contributors or if explicitly allowed by one.
+title: "<title>"
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > [!CAUTION]
+        > ## ONLY OPEN A BLANK ISSUE if you:
+        > - are a VendroidEnhanced contributor
+        > - are a Vencord (upstream) contributor
+        > - were explicitly told to do so by a contributor or org member.
+        > If you don't meet the conditions, please use the other templates.
+        >
+        > **If you open a blank issue without meeting these conditions, you will be blocked from the repository.**
+
+  - type: textarea
+    id: description 
+    attributes:
+      label: Issue content
+    validations:
+      required: true
