@@ -8,8 +8,8 @@ body:
       value: |
         > [!CAUTION]
         > ## ONLY OPEN A BLANK ISSUE if you:
-        > - are a VendroidEnhanced contributor
-        > - are a Vencord (upstream) contributor
+        > - contributed to this repository;
+        > - are a Vencord (upstream) contributor;
         > - were explicitly told to do so by a contributor or org member.
         > If you don't meet the conditions, please use the other templates.
         >
