@@ -1,11 +1,5 @@
 # Vendroid
 
-> 🚩 Due to final exams and overall not having much time to work on personal projects, I (nin0-dev), may not actively commit new features to this project in the next 3 weeks from May 25, 2024.
-> 
-> Important bugs will still be fixed quickly.
-> 
-> PRs will also be reviewed and merged if needed.
-
 > [!WARNING]
 > This app is still in beta. Before reporting a bug to Vencord support, please attempt to reproduce the bug on:
 > - A mobile browser without Vencord by opening `discord.com/app`
