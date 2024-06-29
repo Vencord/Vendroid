@@ -1,13 +1,14 @@
 # Vendroid
 
-> [!WARNING]
-> This app is still in beta. Before reporting a bug to Vencord support, please attempt to reproduce the bug on:
-> - A mobile browser without Vencord by opening `discord.com/app`
->   - If the issue still happens on mobile browser, it is likely a mobile website issue. You can open an issue here. 
-> - A desktop with an official build of Vencord
->   - If the issue still happens on a desktop device with Vencord, it is a Vencord issue and you can report it in the [Vencord](https://discord.gg/vencord) server.
-> 
-> If the issue happens on neither of these two, the issue is with Vendroid and you can open an issue in this repo. 
+> [!CAUTION]
+> This app is still in beta. If you have an issue:
+> - 🚩 **You will NOT** complain in Vendicated/Vencord issues;
+> - 🚩 **You will NOT** complain in Vencord Support;
+> - 🚩 **You will NOT** complain in Vencord/Vendroid issues.
+>
+> Instead:
+> - ✅ **You can** DM me (`@nin0.dev`). You can find me in the Vencord Server;
+> - ✅ Or preferably, open an issue in this repo.
 
 Vendroid is a custom Discord client for Android. The way it works is that it loads the Discord mobile website and injects Vencord.
 
