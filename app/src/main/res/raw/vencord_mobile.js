@@ -35,11 +35,20 @@
         }
     };
 
-    document.addEventListener("DOMContentLoaded", () => document.documentElement.appendChild(
-        Object.assign(document.createElement("link"), {
-            rel: "stylesheet",
-            type: "text/css",
-            href: "https://github.com/VendroidEnhanced/Vencord/releases/download/css/browser.css"
-        })
-    ), { once: true });
+
+    document.addEventListener("DOMContentLoaded", () => {
+            document.documentElement.appendChild(
+                Object.assign(document.createElement("link"), {
+                rel: "stylesheet",
+                type: "text/css",
+                href: "https://github.com/Vendicated/Vencord/releases/download/devbuild/browser.css"
+            }));
+            document.documentElement.appendChild(
+                Object.assign(document.createElement("link"), {
+                rel: "stylesheet",
+                type: "text/css",
+                href: "https://github.com/VendroidEnhanced/plugin/releases/download/css/fixes.css"
+            }));
+    }, { once: true });
+
 })();
