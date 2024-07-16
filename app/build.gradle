@@ -17,7 +17,7 @@ android {
 
     buildTypes {
         debug {
-
+            applicationIdSuffix ".debug"
         }
 
         release {
@@ -31,8 +31,10 @@ android {
 }
 
 dependencies {
+
     implementation 'androidx.annotation:annotation:1.8.0'
     implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.28'
+
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.activity:activity:1.9.0'

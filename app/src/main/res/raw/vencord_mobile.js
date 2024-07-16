@@ -35,6 +35,7 @@
         }
     };
 
+
     document.addEventListener("DOMContentLoaded", () => {
             document.documentElement.appendChild(
                 Object.assign(document.createElement("link"), {
@@ -49,4 +50,5 @@
                 href: "https://github.com/VendroidEnhanced/plugin/releases/download/css/fixes.css"
             }));
     }, { once: true });
+
 })();
