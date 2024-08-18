@@ -54,7 +54,13 @@ class MainActivity : Activity() {
                             showDiscordToast("No updates available", "MESSAGE")
                         }
                     },
-                    { })
+                    { error ->
+                        if (BuildConfig.DEBUG)  {
+                            e("Network error during update check", error)
+                        }
+                        Toast.makeText(this, "Failed to check for updates", Toast.LENGTH_SHORT).show()
+                    }
+            )
             stringRequest.setShouldCache(false);
             queue.add(stringRequest)
         }
