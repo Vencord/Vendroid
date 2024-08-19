@@ -7,10 +7,10 @@ body:
   - type: markdown
     attributes:
       value: |
-        > ![Flowchart](https://github.com/user-attachments/assets/36fe18ba-52c3-4a5d-a721-edd25af47381)
-        > 
-        > <details>
-        >     <summary>Flowchart but in text format</summary>
+        ![Flowchart](https://github.com/user-attachments/assets/36fe18ba-52c3-4a5d-a721-edd25af47381)
+        
+        <details>
+             <summary>Flowchart but in text format</summary>
         >     [!WARNING]
         >     ## ONLY OPEN AN ISSUE IF:
         >     * You are using an up-to-date version of VendroidEnhanced
@@ -19,9 +19,8 @@ body:
         >     * You **could not** reproduce the issue on:
         >       * Vencord Web, Vesktop, or ArmCord, on a computer
         >       * The Discord mobile website (`discord.com/app`) on a mobile browser WITHOUT VENCORD
-        > </details>
-        > 
-        > **Your issue will get closed and you will possibly be blocked from the repository if you cannot read this!**
+        </details>
+        **Your issue will get closed and you will possibly be blocked from the repository if you cannot read this!**
   
   - type: input
     id: discord
