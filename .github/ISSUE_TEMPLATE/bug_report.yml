@@ -7,6 +7,7 @@ body:
   - type: markdown
     attributes:
       value: |
+        > ![Flowchart](https://github.com/user-attachments/assets/36fe18ba-52c3-4a5d-a721-edd25af47381)
         > [!WARNING]
         > ## ONLY OPEN AN ISSUE IF:
         > * You are using an up-to-date version of VendroidEnhanced
