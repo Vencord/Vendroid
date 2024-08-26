@@ -9,7 +9,8 @@ on:
     branches:
       - '*'
       - '!main'
-
+  pull_request:
+  merge_group:
   workflow_dispatch:
 
 jobs:
