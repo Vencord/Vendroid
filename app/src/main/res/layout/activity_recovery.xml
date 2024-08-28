@@ -35,14 +35,14 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Start normally"
+                        android:text="@string/start_normally"
                         android:textAppearance="?attr/textAppearanceTitleMedium" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="Don't do anything and start the app normally."
+                        android:text="@string/start_normally_desc"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
                         android:textColor="?android:attr/textColorSecondary" />
                 </LinearLayout>
@@ -65,14 +65,14 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Safe mode"
+                        android:text="@string/safe_mode"
                         android:textAppearance="?attr/textAppearanceTitleMedium" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="Use this option to launch the app and load Discord, but without Vencord or any VendroidEnhanced tweak injected."
+                        android:text="@string/safe_mode_desc"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
                         android:textColor="?android:attr/textColorSecondary" />
                 </LinearLayout>
@@ -95,14 +95,14 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Open settings"
+                        android:text="@string/open_settings"
                         android:textAppearance="?attr/textAppearanceTitleMedium" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="Configure VendroidEnhanced."
+                        android:text="@string/open_settings_desc"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
                         android:textColor="?android:attr/textColorSecondary" />
                 </LinearLayout>
