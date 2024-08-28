@@ -23,15 +23,10 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
 import com.nin0dev.vendroid.HttpClient.fetchVencord
 import com.nin0dev.vendroid.Logger.e
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 import pl.droidsonroids.gif.GifImageView
 import java.io.IOException
 
 
-@Serializable
 data class UpdateData(val version: Int, val changelog: String)
 
 class MainActivity : Activity() {
@@ -40,7 +35,6 @@ class MainActivity : Activity() {
     @JvmField
     var filePathCallback: ValueCallback<Array<Uri?>?>? = null
 
-    @OptIn(ExperimentalSerializationApi::class)
     fun checkUpdates(ignoreSetting: Boolean = false)
     {
         val sPrefs = getSharedPreferences("settings", Context.MODE_PRIVATE)
