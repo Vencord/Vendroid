@@ -71,34 +71,6 @@
                     android:text="@string/canary" />
             </RadioGroup>
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/vencord_location"
-                android:textColor="@color/text"
-                android:textSize="18sp" />
-
-            <CheckBox
-                android:id="@+id/allow_custom_location"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/set_custom_location" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fitsSystemWindows="true"
-                android:hint="@string/custom_location_url">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/custom_location"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone"
-                    tools:visibility="visible" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
@@ -110,22 +82,13 @@
         android:layout_height="wrap_content"
         android:layout_width="match_parent">
 
-        <com.google.android.material.appbar.CollapsingToolbarLayout
-            style="?attr/collapsingToolbarLayoutLargeStyle"
+        <com.google.android.material.appbar.MaterialToolbar
             android:layout_width="match_parent"
-            android:layout_height="?attr/collapsingToolbarLayoutLargeSize"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
-            app:contentScrim="?attr/colorSurfaceContainer">
-
-            <com.google.android.material.appbar.MaterialToolbar
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:elevation="0dp"
-                app:layout_collapseMode="pin"
-                app:title="Welcome to Vendroid"
-                app:titleTextColor="@color/text" />
-
-        </com.google.android.material.appbar.CollapsingToolbarLayout>
+            android:layout_height="?attr/actionBarSize"
+            android:elevation="0dp"
+            app:layout_collapseMode="pin"
+            app:title="Welcome to Vendroid"
+            app:titleTextColor="@color/text" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

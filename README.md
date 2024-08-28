@@ -1,5 +1,6 @@
 # VendroidEnhanced
 
+<img src="https://waka.nin0.dev/api/badge/nin0/interval:any/project:Vendroid"/>
 
 > [!CAUTION]
 > This app is still in beta. If you have an issue:

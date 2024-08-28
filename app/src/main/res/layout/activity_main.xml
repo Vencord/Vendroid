@@ -13,11 +13,31 @@
         android:orientation="vertical">
 
         <pl.droidsonroids.gif.GifImageView
+            android:id="@+id/viggy_gif"
             android:layout_width="wrap_content"
-            android:layout_height="232dp"
+            android:layout_height="wrap_content"
             android:scaleX="1"
             android:scaleY="1"
-            android:src="@drawable/viggy" />
+            android:src="@drawable/viggy"
+            android:visibility="gone" />
+
+        <pl.droidsonroids.gif.GifImageView
+            android:id="@+id/shiggy_gif"
+            android:layout_width="match_parent"
+            android:layout_height="228dp"
+            android:scaleX="1"
+            android:scaleY="1"
+            android:src="@drawable/shiggy"
+            android:visibility="gone" />
+
+        <pl.droidsonroids.gif.GifImageView
+            android:id="@+id/oneko_gif"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scaleX="1"
+            android:scaleY="1"
+            android:src="@drawable/oneko"
+            android:visibility="gone" />
 
         <TextView
             android:layout_width="wrap_content"

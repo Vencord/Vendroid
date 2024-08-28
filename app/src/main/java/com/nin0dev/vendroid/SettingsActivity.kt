@@ -37,6 +37,11 @@ class SettingsActivity : AppCompatActivity() {
             "ptb" -> findViewById<MaterialRadioButton>(R.id.ptb).isChecked = true
             "canary" -> findViewById<MaterialRadioButton>(R.id.canary).isChecked = true
         }
+        when (sPrefs.getString("splash", "viggy")) {
+            "viggy" -> findViewById<MaterialRadioButton>(R.id.viggy).isChecked = true
+            "shiggy" -> findViewById<MaterialRadioButton>(R.id.shiggy).isChecked = true
+            "oneko" -> findViewById<MaterialRadioButton>(R.id.oneko).isChecked = true
+        }
         if(sPrefs.getString("vencordLocation", "")?.isNotBlank() == true) {
             findViewById<CheckBox>(R.id.allow_custom_location).isChecked = true
             val devbuildField = findViewById<TextInputEditText>(R.id.custom_location)
@@ -71,6 +76,9 @@ class SettingsActivity : AppCompatActivity() {
             if (findViewById<RadioButton>(R.id.stable).isChecked) editor.putString("discordBranch", "stable")
             if (findViewById<RadioButton>(R.id.ptb).isChecked) editor.putString("discordBranch", "ptb")
             if (findViewById<RadioButton>(R.id.canary).isChecked) editor.putString("discordBranch", "canary")
+            if (findViewById<RadioButton>(R.id.viggy).isChecked) editor.putString("splash", "viggy")
+            if (findViewById<RadioButton>(R.id.shiggy).isChecked) editor.putString("splash", "shiggy")
+            if (findViewById<RadioButton>(R.id.oneko).isChecked) editor.putString("splash", "oneko")
             if (findViewById<CheckBox>(R.id.allow_custom_location).isChecked && findViewById<EditText>(R.id.custom_location).text.isNotBlank()) editor.putString("vencordLocation", findViewById<EditText>(R.id.custom_location).text.toString())
 
             editor.apply()

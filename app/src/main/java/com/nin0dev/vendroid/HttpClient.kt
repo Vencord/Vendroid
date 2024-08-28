@@ -3,6 +3,7 @@ package com.nin0dev.vendroid
 import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
+import android.widget.Toast
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
@@ -24,7 +25,8 @@ object HttpClient {
         val res = activity.resources
         res.openRawResource(R.raw.vencord_mobile).use { `is` -> VencordMobileRuntime = readAsText(`is`) }
         if (VencordRuntime != null) return
-        if (sPrefs.getString("vencordLocation", Constants.JS_BUNDLE_URL) == Constants.JS_BUNDLE_URL || BuildConfig.DEBUG) { // user is debugging vencord or app, always redownload
+        if (sPrefs.getString("vencordLocation", Constants.JS_BUNDLE_URL) != Constants.JS_BUNDLE_URL || BuildConfig.DEBUG) { // user is debugging vencord or app, always redownload
+            Toast.makeText(activity, "Debugging app or Vencord, bundle will be redownloaded. Avoid using on limited networks", Toast.LENGTH_LONG).show()
             vendroidFile.delete()
         }
         if (vendroidFile.exists()) {

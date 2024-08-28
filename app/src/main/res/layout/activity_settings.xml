@@ -43,6 +43,38 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:text="@string/splashscreen"
+                android:textColor="@color/text"
+                android:textSize="18sp" />
+
+            <RadioGroup
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <RadioButton
+                    android:id="@+id/viggy"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/viggy" />
+
+                <RadioButton
+                    android:id="@+id/shiggy"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/shiggy" />
+
+                <RadioButton
+                    android:id="@+id/oneko"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/oneko" />
+
+            </RadioGroup>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:text="@string/discord_branch"
                 android:textColor="@color/text"
                 android:textSize="18sp" />
@@ -110,22 +142,13 @@
         android:layout_height="wrap_content"
         android:layout_width="match_parent">
 
-        <com.google.android.material.appbar.CollapsingToolbarLayout
-            style="?attr/collapsingToolbarLayoutLargeStyle"
+        <com.google.android.material.appbar.MaterialToolbar
             android:layout_width="match_parent"
-            android:layout_height="?attr/collapsingToolbarLayoutLargeSize"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
-            app:contentScrim="?attr/colorSurfaceContainer">
-
-            <com.google.android.material.appbar.MaterialToolbar
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:elevation="0dp"
-                app:layout_collapseMode="pin"
-                app:title="Vendroid Settings"
-                app:titleTextColor="@color/text" />
-
-        </com.google.android.material.appbar.CollapsingToolbarLayout>
+            android:layout_height="?attr/actionBarSize"
+            android:elevation="0dp"
+            app:layout_collapseMode="pin"
+            app:title="Vendroid Settings"
+            app:titleTextColor="@color/text" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

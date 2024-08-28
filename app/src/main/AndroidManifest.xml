@@ -12,7 +12,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true"
         tools:targetApi="34">
+        <activity
+            android:name=".RecoveryActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".SettingsActivity"
             android:exported="false" />
@@ -26,6 +32,10 @@
             android:exported="true"
             android:launchMode="singleTask"
             android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -9,10 +9,10 @@ android {
 
     defaultConfig {
         applicationId "com.nin0dev.vendroid"
-        minSdk 21
+        minSdk 25
         targetSdk 34
-        versionCode 5
-        versionName "1.2"
+        versionCode 7
+        versionName "1.4"
     }
 
     buildTypes {
@@ -32,11 +32,12 @@ android {
 
 dependencies {
 
-    implementation 'androidx.annotation:annotation:1.8.1'
+    implementation 'androidx.annotation:annotation:1.8.2'
     implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.28'
     implementation 'com.google.android.material:material:1.12.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.activity:activity:1.9.1'
+    implementation 'com.google.code.gson:gson:2.11.0'
     implementation 'com.android.volley:volley:1.2.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 }
