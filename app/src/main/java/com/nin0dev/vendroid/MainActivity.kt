@@ -13,8 +13,6 @@ import android.os.StrictMode.ThreadPolicy
 import android.view.KeyEvent
 import android.view.View.VISIBLE
 import android.view.WindowManager
-import android.webkit.CookieManager
-import android.webkit.CookieSyncManager
 import android.webkit.ValueCallback
 import android.webkit.WebView
 import android.widget.Toast
@@ -22,11 +20,19 @@ import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.gson.Gson
 import com.nin0dev.vendroid.HttpClient.fetchVencord
 import com.nin0dev.vendroid.Logger.e
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import pl.droidsonroids.gif.GifImageView
 import java.io.IOException
 
+
+@Serializable
+data class UpdateData(val version: Int, val changelog: String)
 
 class MainActivity : Activity() {
     private var wvInitialized = false
@@ -34,20 +40,23 @@ class MainActivity : Activity() {
     @JvmField
     var filePathCallback: ValueCallback<Array<Uri?>?>? = null
 
+    @OptIn(ExperimentalSerializationApi::class)
     fun checkUpdates(ignoreSetting: Boolean = false)
     {
         val sPrefs = getSharedPreferences("settings", Context.MODE_PRIVATE)
         if(sPrefs.getBoolean("checkVendroidUpdates", false) || ignoreSetting) {
             val queue = Volley.newRequestQueue(this)
-            val url = "https://raw.githubusercontent.com/VendroidEnhanced/UpdateTracker/main/vendroid"
+            val url = "https://vendroid.nin0.dev/api/updates"
             val stringRequest = StringRequest(
                 Request.Method.GET, url,
                 { response ->
-                    if(Integer.parseInt(response.trim()) != BuildConfig.VERSION_CODE)
+                    val gson = Gson()
+                    val updateData = gson.fromJson<UpdateData>(response, UpdateData::class.java)
+                    if(updateData.version != BuildConfig.VERSION_CODE)
                     {
                         val madb = MaterialAlertDialogBuilder(this)
                         madb.setTitle(getString(R.string.vendroid_update_available))
-                        madb.setMessage("To make sure that no unexpected bugs happen, it is recommended to update.")
+                        madb.setMessage("Changelog:\n" + updateData.changelog)
                         madb.setPositiveButton(getString(R.string.update), DialogInterface.OnClickListener { dialogInterface, i ->
                             val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/VendroidEnhanced/Vendroid/releases/latest/download/app-release.apk"))
                             startActivity(browserIntent)
@@ -55,7 +64,7 @@ class MainActivity : Activity() {
                         madb.setNegativeButton(getString(R.string.later), DialogInterface.OnClickListener { _, _ ->  })
                         madb.show()
                     }
-                    if(ignoreSetting && Integer.parseInt(response.trim()) == BuildConfig.VERSION_CODE) {
+                    if(ignoreSetting && updateData.version == BuildConfig.VERSION_CODE) {
                         showDiscordToast("No updates available", "MESSAGE")
                     }
                 },
