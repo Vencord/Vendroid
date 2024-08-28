@@ -142,29 +142,37 @@ class MainActivity : Activity() {
         return super.onKeyDown(keyCode, event)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent) {
-        if (requestCode != FILECHOOSER_RESULTCODE || filePathCallback == null) return
-        if (resultCode != RESULT_OK || intent == null) {
-            filePathCallback!!.onReceiveValue(null)
-        } else {
-            var uris: Array<Uri?>?
-            try {
-                val clipData = intent.clipData
-                if (clipData != null) { // multiple items
-                    uris = arrayOfNulls(clipData.itemCount)
-                    for (i in 0 until clipData.itemCount) {
-                        uris[i] = clipData.getItemAt(i).uri
+    override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
+        super.onActivityResult(requestCode, resultCode, intent)
+        try {
+            if(resultCode != RESULT_CANCELED) {
+                if (requestCode != FILECHOOSER_RESULTCODE || filePathCallback == null) return
+                if (resultCode != RESULT_OK || intent == null) {
+                    filePathCallback!!.onReceiveValue(null)
+                } else {
+                    var uris: Array<Uri?>?
+                    try {
+                        val clipData = intent.clipData
+                        if (clipData != null) { // multiple items
+                            uris = arrayOfNulls(clipData.itemCount)
+                            for (i in 0 until clipData.itemCount) {
+                                uris[i] = clipData.getItemAt(i).uri
+                            }
+                        } else { // single item
+                            uris = arrayOf(intent.data)
+                        }
+                    } catch (ex: Exception) {
+                        e("Error during file upload", ex)
+                        uris = null
                     }
-                } else { // single item
-                    uris = arrayOf(intent.data)
+                    filePathCallback!!.onReceiveValue(uris)
                 }
-            } catch (ex: Exception) {
-                e("Error during file upload", ex)
-                uris = null
+                filePathCallback = null
             }
-            filePathCallback!!.onReceiveValue(uris)
         }
-        filePathCallback = null
+        catch (ex: Exception) {
+            // it is well known that the best fix for the crash is to wrap the entire function in a try/catch block
+        }
     }
 
     private fun explodeAndroid() {
