@@ -18,4 +18,8 @@
     <string name="vendroid_update_available">Vendroid update available</string>
     <string name="update">Update</string>
     <string name="later">Later</string>
+    <string name="viggy">Viggy, by shoritsu</string>
+    <string name="shiggy">Shiggy, by naga_U</string>
+    <string name="oneko">Oneko</string>
+    <string name="splashscreen">Splash screen</string>
 </resources>

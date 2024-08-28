@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
 import android.view.KeyEvent
+import android.view.View.VISIBLE
 import android.view.WindowManager
 import android.webkit.ValueCallback
 import android.webkit.WebView
@@ -21,6 +22,7 @@ import com.android.volley.toolbox.Volley
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.nin0dev.vendroid.HttpClient.fetchVencord
 import com.nin0dev.vendroid.Logger.e
+import pl.droidsonroids.gif.GifImageView
 import java.io.IOException
 
 class MainActivity : Activity() {
@@ -78,6 +80,9 @@ class MainActivity : Activity() {
         // https://developer.chrome.com/docs/devtools/remote-debugging/webviews/
         WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
         setContentView(R.layout.activity_main)
+        if (sPrefs.getString("splash", "viggy") == "viggy") findViewById<GifImageView>(R.id.viggy_gif).visibility = VISIBLE
+        else if (sPrefs.getString("splash", "viggy") == "shiggy") findViewById<GifImageView>(R.id.shiggy_gif).visibility = VISIBLE
+        else if (sPrefs.getString("splash", "viggy") == "oneko") findViewById<GifImageView>(R.id.oneko_gif).visibility = VISIBLE
         wv = findViewById(R.id.webview)!!
         explodeAndroid()
         wv!!.setWebViewClient(VWebviewClient())
