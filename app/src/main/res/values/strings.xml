@@ -15,7 +15,19 @@
     <string name="custom_location_url">Custom location URL</string>
     <string name="no">No</string>
     <string name="yes">Yes</string>
-    <string name="vendroid_update_available">Vendroid update available</string>
+    <string name="vendroid_update_available">VendroidEnhanced update available</string>
     <string name="update">Update</string>
     <string name="later">Later</string>
+    <string name="viggy">Viggy, by shoritsu</string>
+    <string name="shiggy">Shiggy, by naga_U</string>
+    <string name="oneko">Oneko</string>
+    <string name="splashscreen">Splash screen</string>
+    <string name="recovery_shortcut_name">Recovery mode</string>
+    <string name="cleared_all">Cleared all cookies</string>
+    <string name="start_normally">Start normally</string>
+    <string name="start_normally_desc">Don\'t do anything and start the app normally.</string>
+    <string name="safe_mode">Safe mode</string>
+    <string name="safe_mode_desc">Use this option to launch the app and load Discord, but without Vencord or any VendroidEnhanced tweak injected.</string>
+    <string name="open_settings">Open settings</string>
+    <string name="open_settings_desc">Configure VendroidEnhanced.</string>
 </resources>
