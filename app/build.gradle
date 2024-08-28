@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId "com.nin0dev.vendroid"
-        minSdk 21
+        minSdk 25
         targetSdk 34
         versionCode 6
         versionName "1.3"

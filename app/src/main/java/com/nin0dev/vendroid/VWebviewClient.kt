@@ -8,9 +8,12 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import com.nin0dev.vendroid.Logger.e
+import java.io.File
 import java.io.IOException
+import java.lang.Exception
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -26,8 +29,13 @@ class VWebviewClient : WebViewClient() {
     }
 
     override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
-        view.evaluateJavascript(HttpClient.VencordRuntime!!, null)
-        view.evaluateJavascript(HttpClient.VencordMobileRuntime!!, null)
+        try {
+            HttpClient.VencordRuntime?.let { view.evaluateJavascript(it, null) }
+            HttpClient.VencordMobileRuntime?.let { view.evaluateJavascript(it, null) }
+        }
+        catch (e: Exception) {
+            Toast.makeText(view.context, "Couldn't load Vencord, try restarting the app.", Toast.LENGTH_LONG).show()
+        }
     }
 
     override fun onPageFinished(view: WebView, url: String) {
