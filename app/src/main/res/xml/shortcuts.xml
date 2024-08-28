@@ -3,8 +3,8 @@
         android:shortcutId="recovery"
         android:enabled="true"
         android:icon="@drawable/reset"
-        android:shortcutShortLabel="@string/recovery_shortcut_name"
-        android:shortcutLongLabel="@string/recovery_shortcut_name">
+        android:shortcutShortLabel="Recovery mode"
+        android:shortcutLongLabel="Recovery mode">
         <intent
             android:action="android.intent.action.VIEW"
             android:targetPackage="com.nin0dev.vendroid"

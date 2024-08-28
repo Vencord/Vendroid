@@ -5,11 +5,15 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.WindowManager
+import android.webkit.CookieManager
+import android.webkit.CookieSyncManager
+import android.webkit.WebView
 import android.widget.Button
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.snackbar.Snackbar
 
 class RecoveryActivity : AppCompatActivity() {
@@ -23,14 +27,23 @@ class RecoveryActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_recovery)
 
-        findViewById<Button>(R.id.reset_vencord_location).setOnClickListener {
+        findViewById<MaterialCardView>(R.id.start_normally).setOnClickListener {
+            finish()
+            startActivity(Intent(this, MainActivity::class.java))
+        }
+        findViewById<MaterialCardView>(R.id.safe_mode).setOnClickListener {
             val sPrefs = getSharedPreferences("settings", Context.MODE_PRIVATE)
             val e = sPrefs.edit()
-            e.putString("vencordLocation", Constants.JS_BUNDLE_URL)
-            e.putBoolean("pendingReset", true)
+            e.putBoolean("safeMode", true)
             e.apply()
-            Snackbar.make(findViewById(R.id.main_layout), "Successfully reset Vencord location", Snackbar.LENGTH_LONG).show()
+            finish()
+            startActivity(Intent(this, MainActivity::class.java))
         }
+        findViewById<MaterialCardView>(R.id.settings).setOnClickListener {
+            finish()
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
+
     }
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)

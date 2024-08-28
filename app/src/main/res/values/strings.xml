@@ -22,4 +22,6 @@
     <string name="shiggy">Shiggy, by naga_U</string>
     <string name="oneko">Oneko</string>
     <string name="splashscreen">Splash screen</string>
+    <string name="recovery_shortcut_name">Recovery mode</string>
+    <string name="cleared_all">Cleared all cookies</string>
 </resources>
