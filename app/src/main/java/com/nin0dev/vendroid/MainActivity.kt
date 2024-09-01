@@ -94,6 +94,9 @@ class MainActivity : Activity() {
         explodeAndroid()
         wv!!.setWebViewClient(VWebviewClient())
         wv!!.setWebChromeClient(VChromeClient(this))
+        if(sPrefs.getBoolean("desktopMode", false)) {
+            wv!!.settings.userAgentString = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+        }
         val s = wv?.getSettings()!!
         s.javaScriptEnabled = true
         s.domStorageEnabled = true

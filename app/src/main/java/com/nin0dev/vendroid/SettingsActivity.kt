@@ -32,6 +32,7 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_settings)
 
         findViewById<MaterialSwitch>(R.id.check_vendroid_updates).isChecked = sPrefs.getBoolean("checkVendroidUpdates", false)
+        findViewById<MaterialSwitch>(R.id.desktop_mode).isChecked = sPrefs.getBoolean("desktopMode", false)
         when (sPrefs.getString("discordBranch", "stable")) {
             "stable" -> findViewById<MaterialRadioButton>(R.id.stable).isChecked = true
             "ptb" -> findViewById<MaterialRadioButton>(R.id.ptb).isChecked = true
@@ -73,6 +74,7 @@ class SettingsActivity : AppCompatActivity() {
             val editor = sPrefs.edit()
 
             editor.putBoolean("checkVendroidUpdates", findViewById<MaterialSwitch>(R.id.check_vendroid_updates).isChecked)
+            editor.putBoolean("desktopMode", findViewById<MaterialSwitch>(R.id.desktop_mode).isChecked)
             if (findViewById<RadioButton>(R.id.stable).isChecked) editor.putString("discordBranch", "stable")
             if (findViewById<RadioButton>(R.id.ptb).isChecked) editor.putString("discordBranch", "ptb")
             if (findViewById<RadioButton>(R.id.canary).isChecked) editor.putString("discordBranch", "canary")

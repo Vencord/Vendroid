@@ -103,6 +103,13 @@
                     android:text="@string/canary" />
             </RadioGroup>
 
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/desktop_mode"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:checked="true"
+                android:text="@string/desktop_mode" />
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -159,8 +166,8 @@
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="20dp"
-        android:contentDescription="Start Vendroid"
-        android:text="Save settings"
+        android:contentDescription="@string/save_settings"
+        android:text="@string/save_settings"
         app:icon="@drawable/save_black_24dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
