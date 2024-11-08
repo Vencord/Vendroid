@@ -39,6 +39,6 @@ dependencies {
     implementation 'androidx.activity:activity:1.9.3'
     implementation 'com.google.code.gson:gson:2.11.0'
     implementation 'com.android.volley:volley:1.2.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
 }
 
