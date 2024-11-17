@@ -21,10 +21,15 @@ object HttpClient {
     @Throws(IOException::class)
     fun fetchVencord(activity: Activity) {
         val sPrefs = activity.getSharedPreferences("settings", Context.MODE_PRIVATE)
+        val e = sPrefs.edit()
         var vendroidFile = File(activity.filesDir, "vencord.js")
         val res = activity.resources
         res.openRawResource(R.raw.vencord_mobile).use { `is` -> VencordMobileRuntime = readAsText(`is`) }
         if (VencordRuntime != null) return
+        if (sPrefs.getInt("lastMajorUpdateThatUserHasUpdatedVencord", 0) < BuildConfig.VERSION_CODE) {
+            if(BuildConfig.DEBUG) Toast.makeText(activity, "Just updated app version, redownloading Vencord", Toast.LENGTH_LONG).show()
+            vendroidFile.delete()
+        }
         if (sPrefs.getString("vencordLocation", Constants.JS_BUNDLE_URL) != Constants.JS_BUNDLE_URL || BuildConfig.DEBUG) { // user is debugging vencord or app, always redownload
             Toast.makeText(activity, "Debugging app or Vencord, bundle will be redownloaded. Avoid using on limited networks", Toast.LENGTH_LONG).show()
             vendroidFile.delete()
@@ -35,6 +40,8 @@ object HttpClient {
         else {
             val conn = fetch(sPrefs.getString("vencordLocation", Constants.JS_BUNDLE_URL)!!)
             vendroidFile.writeText(readAsText(conn.inputStream))
+            e.putInt("lastMajorUpdateThatUserHasUpdatedVencord", BuildConfig.VERSION_CODE)
+            e.apply()
             VencordRuntime = vendroidFile.readText()
         }
     }
