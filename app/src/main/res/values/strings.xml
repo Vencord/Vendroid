@@ -32,4 +32,6 @@
     <string name="open_settings_desc">Configure VendroidEnhanced.</string>
     <string name="save_settings">Save settings</string>
     <string name="desktop_mode">Desktop mode (expect some lag!)</string>
+    <string name="equicord_small">Equicord</string>
+    <string name="equicord">Use Equicord (Vencord fork with more plugins)</string>
 </resources>

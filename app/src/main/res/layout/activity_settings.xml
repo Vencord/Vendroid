@@ -113,6 +113,19 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:text="@string/equicord_small"
+                android:textColor="@color/text"
+                android:textSize="18sp" />
+
+            <CheckBox
+                android:id="@+id/equicord"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/equicord" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:text="@string/vencord_location"
                 android:textColor="@color/text"
                 android:textSize="18sp" />

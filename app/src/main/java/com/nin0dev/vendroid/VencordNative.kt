@@ -30,7 +30,7 @@ class VencordNative(private val activity: MainActivity, private val wv: WebView)
     fun updateVencord() {
         val sPrefs = activity.getSharedPreferences("settings", Context.MODE_PRIVATE)
         var vendroidFile = File(activity.filesDir, "vencord.js")
-        val conn = HttpClient.fetch(sPrefs.getString("vencordLocation", Constants.JS_BUNDLE_URL)!!)
+        val conn = HttpClient.fetch(sPrefs.getString("vencordLocation", if(sPrefs.getBoolean("equicord", false)) Constants.EQUICORD_BUNDLE_URL else Constants.JS_BUNDLE_URL)!!)
         vendroidFile.writeText(HttpClient.readAsText(conn.inputStream))
         activity.showDiscordToast("Updated Vencord, restart to apply changes!", "SUCCESS")
     }

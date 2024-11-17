@@ -13,6 +13,7 @@ import android.widget.EditText
 import android.widget.RadioButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.materialswitch.MaterialSwitch
@@ -81,6 +82,14 @@ class SettingsActivity : AppCompatActivity() {
             if (findViewById<RadioButton>(R.id.viggy).isChecked) editor.putString("splash", "viggy")
             if (findViewById<RadioButton>(R.id.shiggy).isChecked) editor.putString("splash", "shiggy")
             if (findViewById<RadioButton>(R.id.oneko).isChecked) editor.putString("splash", "oneko")
+            if(findViewById<MaterialCheckBox>(R.id.equicord).isChecked) {
+                if(sPrefs.getBoolean("equicord", false)) editor.putInt("lastMajorUpdateThatUserHasUpdatedVencord", 0) // force a reupdate
+                editor.putBoolean("equicord", true)
+            }
+            else {
+                if(!sPrefs.getBoolean("equicord", false)) editor.putInt("lastMajorUpdateThatUserHasUpdatedVencord", 0) // force a reupdate
+                editor.putBoolean("equicord", false)
+            }
             if (findViewById<CheckBox>(R.id.allow_custom_location).isChecked && findViewById<EditText>(R.id.custom_location).text.isNotBlank()) editor.putString("vencordLocation", findViewById<EditText>(R.id.custom_location).text.toString())
 
             editor.apply()
