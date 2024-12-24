@@ -32,15 +32,6 @@
             android:exported="true"
             android:launchMode="singleTask"
             android:theme="@style/AppTheme">
-            <meta-data
-                android:name="android.app.shortcuts"
-                android:resource="@xml/shortcuts" />
-
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -57,6 +48,72 @@
                 <data android:host="*.discordapp.com" />
             </intent-filter>
         </activity>
+
+        <!-- icons -->
+        <activity-alias
+            android:name=".MainMainActivity"
+            android:exported="true"
+            android:roundIcon="@mipmap/ic_launcher_round"
+            android:label="@string/app_name"
+            android:icon="@mipmap/ic_launcher"
+            android:enabled="true"
+            android:targetActivity=".MainActivity">
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".JollyMainActivity"
+            android:exported="true"
+            android:roundIcon="@mipmap/ic_launcher_jolly_round"
+            android:label="@string/app_name"
+            android:icon="@mipmap/ic_launcher_jolly"
+            android:enabled="false"
+            android:targetActivity=".MainActivity">
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".RetroMainActivity"
+            android:exported="true"
+            android:roundIcon="@mipmap/ic_launcher_retro_round"
+            android:label="@string/app_name"
+            android:icon="@mipmap/ic_launcher_retro"
+            android:enabled="false"
+            android:targetActivity=".MainActivity">
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".DiscordMainActivity"
+            android:exported="true"
+            android:roundIcon="@mipmap/ic_launcher_discord_round"
+            android:label="@string/app_name"
+            android:icon="@mipmap/ic_launcher_discord"
+            android:enabled="false"
+            android:targetActivity=".MainActivity">
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
     </application>
 
 </manifest>

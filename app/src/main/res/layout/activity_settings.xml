@@ -151,6 +151,50 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/app_icons_title"
+                android:textColor="@color/text"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/app_icons_desc" />
+
+            <Button
+                android:id="@+id/change_icon_to_main"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10px"
+                android:text="Main icon" />
+
+            <Button
+                android:id="@+id/change_icon_to_christmas"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Christmas colors" />
+
+            <Button
+                android:id="@+id/change_icon_to_retro"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Retro, by @CrimsonFork on GitHub" />
+
+            <Button
+                android:id="@+id/change_icon_to_discord"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="60dp"
+                android:text="Discord colors" />
+
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>

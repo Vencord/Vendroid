@@ -1,11 +1,14 @@
 package com.nin0dev.vendroid
 
 import android.annotation.SuppressLint
+import android.content.ComponentName
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.opengl.Visibility
 import android.os.Bundle
 import android.service.voice.VoiceInteractionSession.VisibleActivityCallback
+import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.widget.CheckBox
@@ -13,6 +16,7 @@ import android.widget.EditText
 import android.widget.RadioButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
@@ -31,6 +35,67 @@ class SettingsActivity : AppCompatActivity() {
         window.navigationBarColor = Color.TRANSPARENT
 
         setContentView(R.layout.activity_settings)
+
+        findViewById<MaterialButton>(R.id.change_icon_to_main).setOnClickListener {
+            packageManager.setComponentEnabledSetting(ComponentName(applicationContext,
+                "com.nin0dev.vendroid.MainMainActivity"
+            ), PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
+            packageManager.setComponentEnabledSetting(ComponentName(applicationContext,
+                "com.nin0dev.vendroid.JollyMainActivity"
+            ), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
+            packageManager.setComponentEnabledSetting(ComponentName(applicationContext,
+                "com.nin0dev.vendroid.DiscordMainActivity"
+            ), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
+            packageManager.setComponentEnabledSetting(ComponentName(applicationContext,
+                "com.nin0dev.vendroid.RetroMainActivity"
+            ), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
+            Toast.makeText(this, "App icon changed!", Toast.LENGTH_SHORT).show()
+        }
+        findViewById<MaterialButton>(R.id.change_icon_to_christmas).setOnClickListener {
+            packageManager.setComponentEnabledSetting(ComponentName(applicationContext,
+                "com.nin0dev.vendroid.MainMainActivity"
+            ), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
+            packageManager.setComponentEnabledSetting(ComponentName(applicationContext,
+                "com.nin0dev.vendroid.JollyMainActivity"
+            ), PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
+            packageManager.setComponentEnabledSetting(ComponentName(applicationContext,
+                "com.nin0dev.vendroid.DiscordMainActivity"
+            ), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
+            packageManager.setComponentEnabledSetting(ComponentName(applicationContext,
+                "com.nin0dev.vendroid.RetroMainActivity"
+            ), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
+            Toast.makeText(this, "App icon changed!", Toast.LENGTH_SHORT).show()
+        }
+        findViewById<MaterialButton>(R.id.change_icon_to_retro).setOnClickListener {
+            packageManager.setComponentEnabledSetting(ComponentName(applicationContext,
+                "com.nin0dev.vendroid.MainMainActivity"
+            ), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
+            packageManager.setComponentEnabledSetting(ComponentName(applicationContext,
+                "com.nin0dev.vendroid.JollyMainActivity"
+            ), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
+            packageManager.setComponentEnabledSetting(ComponentName(applicationContext,
+                "com.nin0dev.vendroid.DiscordMainActivity"
+            ), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
+            packageManager.setComponentEnabledSetting(ComponentName(applicationContext,
+                "com.nin0dev.vendroid.RetroMainActivity"
+            ), PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
+            Toast.makeText(this, "App icon changed!", Toast.LENGTH_SHORT).show()
+        }
+        findViewById<MaterialButton>(R.id.change_icon_to_discord).setOnClickListener {
+            packageManager.setComponentEnabledSetting(ComponentName(applicationContext,
+                "com.nin0dev.vendroid.MainMainActivity"
+            ), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
+            packageManager.setComponentEnabledSetting(ComponentName(applicationContext,
+                "com.nin0dev.vendroid.JollyMainActivity"
+            ), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
+            packageManager.setComponentEnabledSetting(ComponentName(applicationContext,
+                "com.nin0dev.vendroid.DiscordMainActivity"
+            ), PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
+            packageManager.setComponentEnabledSetting(ComponentName(applicationContext,
+                "com.nin0dev.vendroid.RetroMainActivity"
+            ), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
+            Toast.makeText(this, "App icon changed!", Toast.LENGTH_SHORT).show()
+        }
 
         findViewById<MaterialSwitch>(R.id.check_vendroid_updates).isChecked = sPrefs.getBoolean("checkVendroidUpdates", false)
         findViewById<MaterialSwitch>(R.id.desktop_mode).isChecked = sPrefs.getBoolean("desktopMode", false)
