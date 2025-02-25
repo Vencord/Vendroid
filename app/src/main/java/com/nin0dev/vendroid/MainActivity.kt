@@ -21,6 +21,7 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.Firebase
 import com.google.gson.Gson
 import com.nin0dev.vendroid.HttpClient.fetchVencord
 import com.nin0dev.vendroid.Logger.e
@@ -41,7 +42,7 @@ class MainActivity : Activity() {
         val sPrefs = getSharedPreferences("settings", Context.MODE_PRIVATE)
         if(sPrefs.getBoolean("checkVendroidUpdates", false) || ignoreSetting) {
             val queue = Volley.newRequestQueue(this)
-            val url = "https://vendroid.nin0.dev/api/updates"
+            val url = "https://vendroid-staging.nin0.dev/api/updates"
             val stringRequest = StringRequest(
                 Request.Method.GET, url,
                 { response ->
