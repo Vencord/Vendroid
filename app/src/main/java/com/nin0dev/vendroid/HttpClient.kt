@@ -22,7 +22,7 @@ object HttpClient {
     fun fetchVencord(activity: Activity) {
         val sPrefs = activity.getSharedPreferences("settings", Context.MODE_PRIVATE)
         val e = sPrefs.edit()
-        val bundleURLToUse = if(sPrefs.getBoolean("equicord", false)) Constants.EQUICORD_BUNDLE_URL else Constants.JS_BUNDLE_URL
+        val bundleURLToUse = if(sPrefs.getString("clientMod", "vencord") == "equicord") Constants.EQUICORD_BUNDLE_URL else Constants.JS_BUNDLE_URL
         var vendroidFile = File(activity.filesDir, "vencord.js")
         val res = activity.resources
         res.openRawResource(R.raw.vencord_mobile).use { `is` -> VencordMobileRuntime = readAsText(`is`) }

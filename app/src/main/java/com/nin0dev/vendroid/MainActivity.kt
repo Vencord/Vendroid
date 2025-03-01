@@ -37,10 +37,24 @@ class MainActivity : Activity() {
     @JvmField
     var filePathCallback: ValueCallback<Array<Uri?>?>? = null
 
+    fun migrateSettings() {
+        val sPrefs = getSharedPreferences("settings", Context.MODE_PRIVATE)
+        if(sPrefs.getBoolean("migratedSettings", false)) return;
+        val e = sPrefs.edit()
+        e.putBoolean("migratedSettings", true);
+
+        e.putBoolean("checkVDEUpdates", sPrefs.getBoolean("checkVendroidUpdates", true))
+        e.putBoolean("checkAnnouncements", sPrefs.getBoolean("checkVendroidUpdates", true)) // The user likely turned off auto-updating for privacy reasons, so also disable phoning home for announcements.
+        e.putString("clientMod", if(sPrefs.getBoolean("equicord", false)) "equicord" else "vencord")
+        e.putString("splashScreen", sPrefs.getString("splash", "viggy"));
+
+        e.apply()
+    }
+
     fun checkUpdates(ignoreSetting: Boolean = false)
     {
         val sPrefs = getSharedPreferences("settings", Context.MODE_PRIVATE)
-        if(sPrefs.getBoolean("checkVendroidUpdates", false) || ignoreSetting) {
+        if(sPrefs.getBoolean("checkVDEUpdates", true) || sPrefs.getBoolean("checkAnnouncements", true) || ignoreSetting) {
             val queue = Volley.newRequestQueue(this)
             val url = "https://vendroid-staging.nin0.dev/api/updates"
             val stringRequest = StringRequest(
@@ -79,6 +93,7 @@ class MainActivity : Activity() {
     @SuppressLint("SetJavaScriptEnabled") // mad? watch this swag
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        migrateSettings()
         DynamicColors.applyToActivitiesIfAvailable(application)
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
         window.statusBarColor = Color.TRANSPARENT
