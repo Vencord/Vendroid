@@ -99,14 +99,16 @@ class MainActivity : Activity() {
         window.statusBarColor = Color.TRANSPARENT
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
         window.navigationBarColor = Color.TRANSPARENT
+
         val sPrefs = getSharedPreferences("settings", Context.MODE_PRIVATE)
         val editor = sPrefs.edit()
+
         // https://developer.chrome.com/docs/devtools/remote-debugging/webviews/
         WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
         setContentView(R.layout.activity_main)
-        if (sPrefs.getString("splash", "viggy") == "viggy") findViewById<GifImageView>(R.id.viggy_gif).visibility = VISIBLE
-        else if (sPrefs.getString("splash", "viggy") == "shiggy") findViewById<GifImageView>(R.id.shiggy_gif).visibility = VISIBLE
-        else if (sPrefs.getString("splash", "viggy") == "oneko") findViewById<GifImageView>(R.id.oneko_gif).visibility = VISIBLE
+
+        findViewById<GifImageView>(mapOf("viggy" to R.id.viggy_gif, "shiggy" to R.id.shiggy_gif, "oneko" to R.id.oneko_gif)[sPrefs.getString("splashScreen", "viggy")]!!).visibility = VISIBLE
+
         wv = findViewById(R.id.webview)!!
         explodeAndroid()
         wv!!.setWebViewClient(VWebviewClient())
@@ -118,6 +120,7 @@ class MainActivity : Activity() {
         s.javaScriptEnabled = true
         s.domStorageEnabled = true
         s.allowFileAccess = true
+
         if(!sPrefs.getBoolean("safeMode", false)) {
             wv?.addJavascriptInterface(VencordNative(this, wv!!), "VencordMobileNative")
             try {
@@ -131,6 +134,7 @@ class MainActivity : Activity() {
             editor.putBoolean("safeMode", false)
             editor.apply()
         }
+
         val intent = intent
         if (intent.action == Intent.ACTION_VIEW) {
             val data = intent.data
@@ -144,6 +148,7 @@ class MainActivity : Activity() {
                 startActivity(Intent(this@MainActivity, WelcomeActivity::class.java))
             }
         }
+
         checkUpdates()
         wvInitialized = true
     }

@@ -1,8 +1,10 @@
 package com.nin0dev.vendroid
 
 import android.app.Activity
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.util.Log
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
@@ -65,6 +67,7 @@ class VencordNative(private val activity: MainActivity, private val wv: WebView)
     fun setString(id: String, value: String) {
         val sPrefs = activity.getSharedPreferences("settings", Context.MODE_PRIVATE)
         val e = sPrefs.edit()
+        if(id == "clientMod") e.putInt("lastMajorUpdateThatUserHasUpdatedVencord", 0)
         e.putString(id, value)
         e.apply()
     }
@@ -75,5 +78,16 @@ class VencordNative(private val activity: MainActivity, private val wv: WebView)
         val e = sPrefs.edit()
         e.putBoolean(id, value)
         e.apply()
+    }
+
+    @JavascriptInterface
+    fun changeAppIcon(id: String) {
+        val icons = arrayOf("Main", "Jolly", "Discord", "Retro")
+        for (icon in icons) {
+            activity.packageManager.setComponentEnabledSetting(
+                ComponentName(activity.applicationContext,
+                "com.nin0dev.vendroid.${icon}MainActivity"
+            ), if (icon == id) PackageManager.COMPONENT_ENABLED_STATE_ENABLED else PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
+        }
     }
 }
