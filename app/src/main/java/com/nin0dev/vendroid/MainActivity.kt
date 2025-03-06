@@ -36,7 +36,7 @@ class MainActivity : Activity() {
     @JvmField
     var filePathCallback: ValueCallback<Array<Uri?>?>? = null
 
-    fun migrateSettings() {
+    private fun migrateSettings() {
         val sPrefs = getSharedPreferences("settings", Context.MODE_PRIVATE)
         if(sPrefs.getBoolean("migratedSettings", false)) return;
         val e = sPrefs.edit()
@@ -187,7 +187,7 @@ class MainActivity : Activity() {
         )
     }
 
-    fun handleUrl(url: Uri?) {
+    private fun handleUrl(url: Uri?) {
         if (url != null) {
             if (url.authority != "discord.com" || url.authority != "ptb.discord.com" || url.authority != "canary.discord.com") return
             if (!wvInitialized) {
