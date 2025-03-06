@@ -1,13 +1,12 @@
-package com.nin0dev.vendroid
+package com.nin0dev.vendroid.webview
 
 import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
+import com.nin0dev.vendroid.MainActivity
 import com.nin0dev.vendroid.utils.Constants
-import com.nin0dev.vendroid.webview.HttpClient
 import java.io.File
 
 class VencordNative(private val activity: MainActivity, private val wv: WebView) {
@@ -22,14 +21,14 @@ class VencordNative(private val activity: MainActivity, private val wv: WebView)
     @JavascriptInterface
     fun updateVencord() {
         val sPrefs = activity.getSharedPreferences("settings", Context.MODE_PRIVATE)
-        var vendroidFile = File(activity.filesDir, "vencord.js")
+        val vendroidFile = File(activity.filesDir, "vencord.js")
         val conn = HttpClient.fetch(sPrefs.getString("vencordLocation", if(sPrefs.getBoolean("equicord", false)) Constants.EQUICORD_BUNDLE_URL else Constants.JS_BUNDLE_URL)!!)
         vendroidFile.writeText(HttpClient.readAsText(conn.inputStream))
         activity.showDiscordToast("Updated Vencord, restart to apply changes!", "SUCCESS")
     }
 
     @JavascriptInterface
-    fun checkVendroidUpdates() {
+    fun updateVendroid() {
         activity.checkUpdates(ignoreSetting = true)
     }
 

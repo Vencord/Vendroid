@@ -19,52 +19,98 @@ import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.material.color.DynamicColors
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
-import com.nin0dev.vendroid.webview.HttpClient.fetchVencord
 import com.nin0dev.vendroid.utils.Logger.e
+import com.nin0dev.vendroid.utils.UpdateData
+import com.nin0dev.vendroid.webview.HttpClient.fetchVencord
 import com.nin0dev.vendroid.webview.VChromeClient
 import com.nin0dev.vendroid.webview.VWebviewClient
+import com.nin0dev.vendroid.webview.VencordNative
 import pl.droidsonroids.gif.GifImageView
 import java.io.IOException
-
-
-data class UpdateData(val id: Int?)
 
 class MainActivity : Activity() {
     private var wvInitialized = false
     private var wv: WebView? = null
+
     @JvmField
     var filePathCallback: ValueCallback<Array<Uri?>?>? = null
 
     private fun migrateSettings() {
         val sPrefs = getSharedPreferences("settings", Context.MODE_PRIVATE)
-        if(sPrefs.getBoolean("migratedSettings", false)) return;
+        if (sPrefs.getBoolean("migratedSettings", false)) return;
         val e = sPrefs.edit()
         e.putBoolean("migratedSettings", true);
 
         e.putBoolean("checkVDEUpdates", sPrefs.getBoolean("checkVendroidUpdates", true))
-        e.putBoolean("checkAnnouncements", sPrefs.getBoolean("checkVendroidUpdates", true)) // The user likely turned off auto-updating for privacy reasons, so also disable phoning home for announcements.
-        e.putString("clientMod", if(sPrefs.getBoolean("equicord", false)) "equicord" else "vencord")
+        e.putBoolean(
+            "checkAnnouncements",
+            sPrefs.getBoolean("checkVendroidUpdates", true)
+        ) // The user likely turned off auto-updating for privacy reasons, so also disable phoning home for announcements.
+        e.putString(
+            "clientMod",
+            if (sPrefs.getBoolean("equicord", false)) "equicord" else "vencord"
+        )
         e.putString("splashScreen", sPrefs.getString("splash", "viggy"));
 
         e.apply()
     }
 
-    fun checkUpdates(ignoreSetting: Boolean = false)
-    {
+    fun checkUpdates(ignoreSetting: Boolean = false) {
         val sPrefs = getSharedPreferences("settings", Context.MODE_PRIVATE)
-        if(sPrefs.getBoolean("checkVDEUpdates", true) || sPrefs.getBoolean("checkAnnouncements", true) || ignoreSetting) {
+        if (sPrefs.getBoolean("checkVDEUpdates", true) || sPrefs.getBoolean(
+                "checkAnnouncements",
+                true
+            ) || ignoreSetting
+        ) {
             val queue = Volley.newRequestQueue(this)
-            val url = "https://vendroid-staging.nin0.dev/api/updates?version=${BuildConfig.VERSION_CODE}"
+            val url =
+                "https://vendroid-staging.nin0.dev/api/updates?version=${BuildConfig.VERSION_CODE}"
             val stringRequest = StringRequest(
                 Request.Method.GET, url,
                 { response ->
                     val gson = Gson()
                     val updateData = gson.fromJson<UpdateData>(response, UpdateData::class.java)
 
+                    if (updateData.update != null && sPrefs.getBoolean("checkVDEUpdates", true)) {
+                        MaterialAlertDialogBuilder(this)
+                            .setIcon(R.drawable.baseline_system_update_24)
+                            .setTitle("An update is available (${updateData.update.title})")
+                            .setMessage(updateData.update.text)
+                            .setPositiveButton(getString(R.string.update)) { _, _ ->
+                                val browserIntent = Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse("https://github.com/nin0-dev/VendroidEnhanced/releases/latest/download/app-release.apk")
+                                )
+                                startActivity(browserIntent)
+                            }
+                            .setNegativeButton(getString(R.string.later)) { _, _ -> }
+                            .show()
+                    }
+                    if (!sPrefs.getBoolean(
+                            "checkAnnouncements",
+                            true
+                        ) || ignoreSetting
+                    ) return@StringRequest
+                    for (announcement in updateData.announcements!!) {
+                        val sp = getSharedPreferences("announcements", Context.MODE_PRIVATE)
+                        if (!sp.getBoolean(announcement.id.toString(), false)) {
+                            MaterialAlertDialogBuilder(this)
+                                .setIcon(R.drawable.campaign_24dp_000000)
+                                .setTitle(announcement.title)
+                                .setMessage(announcement.text)
+                                .setPositiveButton("OK") { _, _ ->
+                                    val e = sp.edit()
+                                    e.putBoolean(announcement.id.toString(), true)
+                                    e.apply()
+                                }
+                                .show()
+                        }
+                    }
                 },
                 { error ->
-                    if (BuildConfig.DEBUG)  {
+                    if (BuildConfig.DEBUG) {
                         e("Network error during update check", error)
                     }
                     Toast.makeText(this, "Failed to check for updates", Toast.LENGTH_SHORT).show()
@@ -92,30 +138,37 @@ class MainActivity : Activity() {
         WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
         setContentView(R.layout.activity_main)
 
-        findViewById<GifImageView>(mapOf("viggy" to R.id.viggy_gif, "shiggy" to R.id.shiggy_gif, "oneko" to R.id.oneko_gif)[sPrefs.getString("splashScreen", "viggy")]!!).visibility = VISIBLE
+        findViewById<GifImageView>(
+            mapOf(
+                "viggy" to R.id.viggy_gif,
+                "shiggy" to R.id.shiggy_gif,
+                "oneko" to R.id.oneko_gif
+            )[sPrefs.getString("splashScreen", "viggy")]!!
+        ).visibility = VISIBLE
 
         wv = findViewById(R.id.webview)!!
         explodeAndroid()
         wv!!.setWebViewClient(VWebviewClient())
         wv!!.setWebChromeClient(VChromeClient(this))
-        if(sPrefs.getBoolean("desktopMode", false)) {
-            wv!!.settings.userAgentString = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+        if (sPrefs.getBoolean("desktopMode", false)) {
+            wv!!.settings.userAgentString =
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
         }
         val s = wv?.getSettings()!!
         s.javaScriptEnabled = true
         s.domStorageEnabled = true
         s.allowFileAccess = true
 
-        if(!sPrefs.getBoolean("safeMode", false)) {
+        if (!sPrefs.getBoolean("safeMode", false)) {
             wv?.addJavascriptInterface(VencordNative(this, wv!!), "VencordMobileNative")
             try {
                 fetchVencord(this)
             } catch (ex: IOException) {
 
             }
-        }
-        else {
-            Toast.makeText(this, "Safe mode enabled, Vencord won't be loaded", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "Safe mode enabled, Vencord won't be loaded", Toast.LENGTH_SHORT)
+                .show()
             editor.putBoolean("safeMode", false)
             editor.apply()
         }
@@ -149,7 +202,7 @@ class MainActivity : Activity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
         super.onActivityResult(requestCode, resultCode, intent)
         try {
-            if(resultCode != RESULT_CANCELED) {
+            if (resultCode != RESULT_CANCELED) {
                 if (requestCode != FILECHOOSER_RESULTCODE || filePathCallback == null) return
                 if (resultCode != RESULT_OK || intent == null) {
                     filePathCallback!!.onReceiveValue(null)
@@ -173,8 +226,7 @@ class MainActivity : Activity() {
                 }
                 filePathCallback = null
             }
-        }
-        catch (ex: Exception) {
+        } catch (ex: Exception) {
             // it is well known that the best fix for the crash is to wrap the entire function in a try/catch block
         }
     }
@@ -193,7 +245,10 @@ class MainActivity : Activity() {
             if (!wvInitialized) {
                 wv!!.loadUrl(url.toString())
             } else {
-                wv!!.evaluateJavascript("Vencord.Webpack.Common.NavigationRouter.transitionTo(\"" + url.path + "\")", null)
+                wv!!.evaluateJavascript(
+                    "Vencord.Webpack.Common.NavigationRouter.transitionTo(\"" + url.path + "\")",
+                    null
+                )
             }
         }
     }
@@ -206,7 +261,10 @@ class MainActivity : Activity() {
 
     fun showDiscordToast(message: String, type: String) {
         wv?.post(Runnable {
-            wv?.evaluateJavascript("toasts=Vencord.Webpack.Common.Toasts; toasts.show({id: toasts.genId(), message: \"$message\", type: toasts.Type.$type, options: {position: toasts.Position.BOTTOM,}})", null) // NOBODY LIKES TOASTS AT THE TOP
+            wv?.evaluateJavascript(
+                "toasts=Vencord.Webpack.Common.Toasts; toasts.show({id: toasts.genId(), message: \"$message\", type: toasts.Type.$type, options: {position: toasts.Position.BOTTOM,}})",
+                null
+            ) // NOBODY LIKES TOASTS AT THE TOP
         })
     }
 
