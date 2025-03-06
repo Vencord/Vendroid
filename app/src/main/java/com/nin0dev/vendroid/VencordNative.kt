@@ -1,18 +1,13 @@
 package com.nin0dev.vendroid
 
-import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.util.Log
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
-import android.widget.Toast
-import com.android.volley.Request
-import com.android.volley.toolbox.StringRequest
-import com.android.volley.toolbox.Volley
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.nin0dev.vendroid.utils.Constants
+import com.nin0dev.vendroid.webview.HttpClient
 import java.io.File
 
 class VencordNative(private val activity: MainActivity, private val wv: WebView) {
@@ -22,11 +17,6 @@ class VencordNative(private val activity: MainActivity, private val wv: WebView)
             if (wv.canGoBack()) wv.goBack() else  // no idea what i was smoking when I wrote this
                 activity.getActionBar()
         }
-    }
-
-    @JavascriptInterface
-    fun openSettings() {
-        activity.startActivity(Intent(activity, SettingsActivity::class.java))
     }
 
     @JavascriptInterface

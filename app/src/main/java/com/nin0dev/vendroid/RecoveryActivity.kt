@@ -39,10 +39,6 @@ class RecoveryActivity : AppCompatActivity() {
             finish()
             startActivity(Intent(this, MainActivity::class.java))
         }
-        findViewById<MaterialCardView>(R.id.settings).setOnClickListener {
-            finish()
-            startActivity(Intent(this, SettingsActivity::class.java))
-        }
 
     }
     override fun onNewIntent(intent: Intent) {

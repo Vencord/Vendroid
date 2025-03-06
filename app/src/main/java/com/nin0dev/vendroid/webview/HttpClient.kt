@@ -1,9 +1,11 @@
-package com.nin0dev.vendroid
+package com.nin0dev.vendroid.webview
 
 import android.app.Activity
 import android.content.Context
-import android.content.SharedPreferences
 import android.widget.Toast
+import com.nin0dev.vendroid.BuildConfig
+import com.nin0dev.vendroid.R
+import com.nin0dev.vendroid.utils.Constants
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException

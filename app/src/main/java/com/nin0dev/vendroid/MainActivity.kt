@@ -3,7 +3,6 @@ package com.nin0dev.vendroid
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
@@ -20,16 +19,16 @@ import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.material.color.DynamicColors
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.firebase.Firebase
 import com.google.gson.Gson
-import com.nin0dev.vendroid.HttpClient.fetchVencord
-import com.nin0dev.vendroid.Logger.e
+import com.nin0dev.vendroid.webview.HttpClient.fetchVencord
+import com.nin0dev.vendroid.utils.Logger.e
+import com.nin0dev.vendroid.webview.VChromeClient
+import com.nin0dev.vendroid.webview.VWebviewClient
 import pl.droidsonroids.gif.GifImageView
 import java.io.IOException
 
 
-data class UpdateData(val version: Int, val changelog: String)
+data class UpdateData(val id: Int?)
 
 class MainActivity : Activity() {
     private var wvInitialized = false
@@ -56,27 +55,13 @@ class MainActivity : Activity() {
         val sPrefs = getSharedPreferences("settings", Context.MODE_PRIVATE)
         if(sPrefs.getBoolean("checkVDEUpdates", true) || sPrefs.getBoolean("checkAnnouncements", true) || ignoreSetting) {
             val queue = Volley.newRequestQueue(this)
-            val url = "https://vendroid-staging.nin0.dev/api/updates"
+            val url = "https://vendroid-staging.nin0.dev/api/updates?version=${BuildConfig.VERSION_CODE}"
             val stringRequest = StringRequest(
                 Request.Method.GET, url,
                 { response ->
                     val gson = Gson()
                     val updateData = gson.fromJson<UpdateData>(response, UpdateData::class.java)
-                    if(updateData.version != BuildConfig.VERSION_CODE)
-                    {
-                        val madb = MaterialAlertDialogBuilder(this)
-                        madb.setTitle(getString(R.string.vendroid_update_available))
-                        madb.setMessage("Changelog:\n" + updateData.changelog)
-                        madb.setPositiveButton(getString(R.string.update), DialogInterface.OnClickListener { dialogInterface, i ->
-                            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/VendroidEnhanced/Vendroid/releases/latest/download/app-release.apk"))
-                            startActivity(browserIntent)
-                        })
-                        madb.setNegativeButton(getString(R.string.later), DialogInterface.OnClickListener { _, _ ->  })
-                        madb.show()
-                    }
-                    if(ignoreSetting && updateData.version == BuildConfig.VERSION_CODE) {
-                        showDiscordToast("No updates available", "MESSAGE")
-                    }
+
                 },
                 { error ->
                     if (BuildConfig.DEBUG)  {
@@ -140,13 +125,13 @@ class MainActivity : Activity() {
             val data = intent.data
             if (data != null) handleUrl(intent.data)
         } else {
-            if (sPrefs.getString("discordBranch", "") == "stable") wv!!.loadUrl("https://discord.com/app")
-            else if (sPrefs.getString("discordBranch", "") == "ptb") wv!!.loadUrl("https://ptb.discord.com/app")
-            else if (sPrefs.getString("discordBranch", "") == "canary") wv!!.loadUrl("https://canary.discord.com/app")
-            else {
-                finish()
-                startActivity(Intent(this@MainActivity, WelcomeActivity::class.java))
-            }
+            wv!!.loadUrl(
+                mapOf(
+                    "stable" to "https://discord.com/app",
+                    "ptb" to "https://discord.com/app",
+                    "oneko" to "https://discord.com/app"
+                )[sPrefs.getString("discordBranch", "stable")]!!
+            )
         }
 
         checkUpdates()

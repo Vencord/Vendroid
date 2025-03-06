@@ -1,4 +1,4 @@
-package com.nin0dev.vendroid
+package com.nin0dev.vendroid.webview
 
 import android.content.Intent
 import android.graphics.Bitmap
@@ -10,8 +10,6 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import com.nin0dev.vendroid.Logger.e
-import java.io.File
 import java.io.IOException
 import java.lang.Exception
 import java.net.HttpURLConnection

@@ -1,4 +1,4 @@
-package com.nin0dev.vendroid
+package com.nin0dev.vendroid.utils
 
 import android.util.Log
 
