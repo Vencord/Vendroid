@@ -9,10 +9,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
-import android.text.Editable
-import android.text.Spannable
-import android.text.TextWatcher
-import android.text.style.ForegroundColorSpan
 import android.view.KeyEvent
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -67,25 +63,6 @@ class MainActivity : Activity() {
             wv!!.visibility = VISIBLE
             currentFocus?.clearFocus();
         }
-
-        cssEditText.addTextChangedListener(object : TextWatcher {
-            val FUNCTION: String = "function"
-            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
-
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
-
-            override fun afterTextChanged(s: Editable) {
-                val index = s.toString().indexOf(FUNCTION)
-                if (index >= 0) {
-                    s.setSpan(
-                        ForegroundColorSpan(Color.CYAN),
-                        index,
-                        index + FUNCTION.length,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                }
-            }
-        })
     }
 
     private fun migrateSettings() {
