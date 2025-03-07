@@ -47,7 +47,7 @@
                 Object.assign(document.createElement("link"), {
                 rel: "stylesheet",
                 type: "text/css",
-                href: "https://github.com/VendroidEnhanced/plugin/releases/download/css/fixes.css"
+                href: "https://raw.githubusercontent.com/VendroidEnhanced/random-files/refs/heads/main/moreFixes.css"
             }));
     }, { once: true });
 

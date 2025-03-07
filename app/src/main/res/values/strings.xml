@@ -36,4 +36,6 @@
     <string name="equicord">Use Equicord (Vencord fork with more plugins)</string>
     <string name="app_icons_title">App icons</string>
     <string name="app_icons_desc">Change your VendroidEnhanced app icon! Occasionally, seasonal icons may appear.</string>
+    <string name="quickcss">QuickCSS</string>
+    <string name="save_exit"><![CDATA[Save & exit]]></string>
 </resources>

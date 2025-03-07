@@ -20,9 +20,6 @@
             android:launchMode="singleTask"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".SettingsActivity"
-            android:exported="false" />
-        <activity
             android:name=".WelcomeActivity"
             android:exported="false"
             android:theme="@style/AppTheme" />
