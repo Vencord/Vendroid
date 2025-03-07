@@ -135,7 +135,12 @@ class MainActivity : Activity() {
         val editor = sPrefs.edit()
 
         // https://developer.chrome.com/docs/devtools/remote-debugging/webviews/
-        WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
+        WebView.setWebContentsDebuggingEnabled(
+            BuildConfig.DEBUG || sPrefs.getBoolean(
+                "allowRemoteDebugging",
+                false
+            )
+        )
         setContentView(R.layout.activity_main)
 
         findViewById<GifImageView>(
@@ -163,7 +168,7 @@ class MainActivity : Activity() {
             wv?.addJavascriptInterface(VencordNative(this, wv!!), "VencordMobileNative")
             try {
                 fetchVencord(this)
-            } catch (ex: IOException) {
+            } catch (_: IOException) {
 
             }
         } else {
