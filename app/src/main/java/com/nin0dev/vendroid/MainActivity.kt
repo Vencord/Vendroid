@@ -94,7 +94,7 @@ class MainActivity : Activity() {
         ) {
             val queue = Volley.newRequestQueue(this)
             val url =
-                "https://vendroid-staging.nin0.dev/api/updates?version=${BuildConfig.VERSION_CODE}"
+                "https://vendroid.nin0.dev/api/updates?version=${BuildConfig.VERSION_CODE}"
             val stringRequest = StringRequest(
                 Request.Method.GET, url,
                 { response ->
