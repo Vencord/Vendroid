@@ -3,9 +3,14 @@ package com.nin0dev.vendroid.webview
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
+import android.widget.LinearLayout
+import com.google.android.material.textfield.TextInputEditText
 import com.nin0dev.vendroid.MainActivity
+import com.nin0dev.vendroid.R
 import com.nin0dev.vendroid.utils.Constants
 import java.io.File
 
@@ -79,4 +84,16 @@ class VencordNative(private val activity: MainActivity, private val wv: WebView)
             ), if (icon == id) PackageManager.COMPONENT_ENABLED_STATE_ENABLED else PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
         }
     }
+
+    @JavascriptInterface
+    fun openQuickCss(quickCss: String) {
+        activity.runOnUiThread {
+            activity.findViewById<LinearLayout>(R.id.quickcss).visibility = VISIBLE
+            activity.findViewById<LinearLayout>(R.id.loading_screen).visibility = GONE
+            activity.findViewById<WebView>(R.id.webview).visibility = GONE
+            activity.findViewById<TextInputEditText>(R.id.css).setText(quickCss)
+        }
+    }
+
+
 }

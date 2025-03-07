@@ -9,17 +9,25 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
+import android.text.Editable
+import android.text.Spannable
+import android.text.TextWatcher
+import android.text.style.ForegroundColorSpan
 import android.view.KeyEvent
+import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.WindowManager
 import android.webkit.ValueCallback
 import android.webkit.WebView
+import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.Toast
 import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
 import com.nin0dev.vendroid.utils.Logger.e
 import com.nin0dev.vendroid.utils.UpdateData
@@ -30,12 +38,55 @@ import com.nin0dev.vendroid.webview.VencordNative
 import pl.droidsonroids.gif.GifImageView
 import java.io.IOException
 
+
 class MainActivity : Activity() {
     private var wvInitialized = false
     private var wv: WebView? = null
 
     @JvmField
     var filePathCallback: ValueCallback<Array<Uri?>?>? = null
+
+    private fun setupQuickCss() {
+        val saveButton = findViewById<Button>(R.id.save_css)
+        val cssEditText = findViewById<TextInputEditText>(R.id.css)
+
+        saveButton.setOnClickListener {
+            wv!!.evaluateJavascript(
+                "VencordNative.quickCss.set(\"${
+                    cssEditText.text
+                        .toString()
+                        .replace("\\", "\\\\")
+                        .replace("\"", "\\\"")
+                        .replace("\n", "\\n")
+                        .replace("\r", "\\r")
+                }\")", null
+            )
+            showDiscordToast("Saved QuickCSS", "SUCCESS")
+            findViewById<LinearLayout>(R.id.quickcss).visibility = GONE
+            findViewById<LinearLayout>(R.id.loading_screen).visibility = GONE
+            wv!!.visibility = VISIBLE
+            currentFocus?.clearFocus();
+        }
+
+        cssEditText.addTextChangedListener(object : TextWatcher {
+            val FUNCTION: String = "function"
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: Editable) {
+                val index = s.toString().indexOf(FUNCTION)
+                if (index >= 0) {
+                    s.setSpan(
+                        ForegroundColorSpan(Color.CYAN),
+                        index,
+                        index + FUNCTION.length,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                }
+            }
+        })
+    }
 
     private fun migrateSettings() {
         val sPrefs = getSharedPreferences("settings", Context.MODE_PRIVATE)
@@ -152,6 +203,7 @@ class MainActivity : Activity() {
         ).visibility = VISIBLE
 
         wv = findViewById(R.id.webview)!!
+        setupQuickCss()
         explodeAndroid()
         wv!!.setWebViewClient(VWebviewClient())
         wv!!.setWebChromeClient(VChromeClient(this))
