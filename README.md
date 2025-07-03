@@ -1,6 +1,6 @@
 # Vendroid
 
-Vendroid is not actively being improved. However, it still functions just fine and doesn't need any updates.
+Vendroid is not actively being improved. However, it still functions just fine and doesn't need any updates (it is not abandoned / discontinued).
 
 For a more feature complete app, check out Vendroid Enhanced instead!
 
