@@ -76,7 +76,7 @@ class VencordNative(private val activity: MainActivity, private val wv: WebView)
 
     @JavascriptInterface
     fun changeAppIcon(id: String) {
-        val icons = arrayOf("Main", "Jolly", "Discord", "Retro")
+        val icons = arrayOf("Main", "Jolly", "Discord", "Retro", "TS12")
         for (icon in icons) {
             activity.packageManager.setComponentEnabledSetting(
                 ComponentName(activity.applicationContext,
