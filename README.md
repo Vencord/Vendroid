@@ -2,9 +2,9 @@
 
 Vendroid is not actively being improved. However, it still functions just fine and doesn't need any updates (it is not abandoned / discontinued).
 
-For a more feature complete app, check out Vendroid Enhanced instead!
+For a more feature complete app, check out VendroidEnhanced instead!
 
-[![Static Badge](https://img.shields.io/badge/Get%20Vendroid%20Enhanced-black?style=for-the-badge&logo=github&link=https%3A%2F%2Fgithub.com%2Fnin0-dev%2FVendroidEnhanced)](https://github.com/nin0-dev/VendroidEnhanced)
+[![Static Badge](https://img.shields.io/badge/Get%20VendroidEnhanced-black?style=for-the-badge&logo=github&link=https%3A%2F%2Fvendroid.nin0.dev)](https://github.com/nin0-dev/VendroidEnhanced)
 
 
 ---
