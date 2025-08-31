@@ -4,7 +4,7 @@ Vendroid is not actively being improved. However, it still functions just fine a
 
 For a more feature complete app, check out VendroidEnhanced instead!
 
-[![Static Badge](https://img.shields.io/badge/Get%20VendroidEnhanced-black?style=for-the-badge&logo=github&link=https%3A%2F%2Fvendroid.nin0.dev)](https://github.com/nin0-dev/VendroidEnhanced)
+[![Static Badge](https://img.shields.io/badge/Get%20VendroidEnhanced-black?style=for-the-badge&logo=android&link=https%3A%2F%2Fvendroid.nin0.dev)](https://vendroid.nin0.dev)
 
 
 ---
