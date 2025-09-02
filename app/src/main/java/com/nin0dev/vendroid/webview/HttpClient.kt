@@ -50,7 +50,7 @@ object HttpClient {
     }
 
     @Throws(IOException::class)
-    fun fetch(url: String): HttpURLConnection {
+    fun fetch(url: String?): HttpURLConnection {
         val conn = URL(url).openConnection() as HttpURLConnection
         if (conn.getResponseCode() >= 300) {
             throw HttpException(conn)
