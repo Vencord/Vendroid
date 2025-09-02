@@ -19,10 +19,6 @@
             android:launchMode="singleTask"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".WelcomeActivity"
-            android:exported="false"
-            android:theme="@style/AppTheme" />
-        <activity
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|layoutDirection"
             android:exported="true"
