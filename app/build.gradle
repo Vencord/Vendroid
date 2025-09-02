@@ -11,8 +11,8 @@ android {
         applicationId "com.nin0dev.vendroid"
         minSdk 25
         targetSdk 34
-        versionCode 12
-        versionName "1.9"
+        versionCode 13
+        versionName "1.10"
     }
 
     buildTypes {
