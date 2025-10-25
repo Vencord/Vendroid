@@ -9,6 +9,7 @@ import android.os.StrictMode;
 import android.view.KeyEvent;
 import android.webkit.ValueCallback;
 import android.webkit.WebView;
+import android.widget.FrameLayout;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -16,7 +17,9 @@ import java.util.Objects;
 public class MainActivity extends Activity {
     public static final int FILECHOOSER_RESULTCODE = 8485;
     private boolean wvInitialized = false;
-    private WebView wv;
+    private WebView navigationWebView;
+    private WebView contentWebView;
+
 
     public ValueCallback<Uri[]> filePathCallback;
 
@@ -30,10 +33,40 @@ public class MainActivity extends Activity {
 
         setContentView(R.layout.activity_main);
 
-        wv = findViewById(R.id.webview);
+        if (findViewById(R.id.navigation_pane) != null) {
+            // Tablet layout
+            navigationWebView = new WebView(this);
+            contentWebView = new WebView(this);
+
+            ((FrameLayout) findViewById(R.id.navigation_pane)).addView(navigationWebView);
+            ((FrameLayout) findViewById(R.id.content_pane)).addView(contentWebView);
+
+            configureWebView(navigationWebView);
+            configureWebView(contentWebView);
+
+            navigationWebView.loadUrl("https://discord.com/app");
+            contentWebView.loadData("<html><body><h1>Select a channel</h1></body></html>", "text/html", "UTF-8");
+
+        } else {
+            // Mobile layout
+            WebView wv = findViewById(R.id.webview);
+            configureWebView(wv);
+            wv.loadUrl("https://discord.com/app");
+        }
+
 
         explodeAndroid();
 
+        Intent intent = getIntent();
+        if (Objects.equals(intent.getAction(), Intent.ACTION_VIEW)) {
+            Uri data = intent.getData();
+            if (data != null) handleUrl(intent.getData());
+        }
+
+        wvInitialized = true;
+    }
+
+    private void configureWebView(WebView wv) {
         wv.setWebViewClient(new VWebviewClient());
         wv.setWebChromeClient(new VChromeClient(this));
 
@@ -48,22 +81,12 @@ public class MainActivity extends Activity {
             HttpClient.fetchVencord(this);
         } catch (IOException ex) {
             Logger.e("Failed to fetch Vencord", ex);
-            return;
         }
-
-        Intent intent = getIntent();
-        if (Objects.equals(intent.getAction(), Intent.ACTION_VIEW)) {
-            Uri data = intent.getData();
-            if (data != null) handleUrl(intent.getData());
-        } else {
-            wv.loadUrl("https://discord.com/app");
-        }
-
-        wvInitialized = true;
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        WebView wv = contentWebView != null ? contentWebView : navigationWebView;
         if (keyCode == KeyEvent.KEYCODE_BACK && wv != null) {
             runOnUiThread(() -> wv.evaluateJavascript("VencordMobile.onBackPress()", r -> {
                 if ("false".equals(r))
@@ -115,6 +138,7 @@ public class MainActivity extends Activity {
     public void handleUrl(Uri url) {
         if (url != null) {
             if (!url.getAuthority().equals("discord.com")) return;
+            WebView wv = contentWebView != null ? contentWebView : navigationWebView;
             if (!wvInitialized) {
                 wv.loadUrl(url.toString());
             } else {
