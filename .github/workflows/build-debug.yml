@@ -1,5 +1,6 @@
 name: Build debug APK
 on:
+  push:
   workflow_dispatch:
 
 permissions:
@@ -36,4 +37,3 @@ jobs:
           gh release create "debug-${{ github.run_number }}" \
             app/build/outputs/apk/debug/app-debug.apk \
             --title "Debug build ${{ github.run_number }}" --prerelease
-            
