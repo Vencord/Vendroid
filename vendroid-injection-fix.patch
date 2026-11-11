@@ -1,0 +1,970 @@
+diff --git a/app/src/main/java/dev/vendicated/vencord/Constants.java b/app/src/main/java/dev/vendicated/vencord/Constants.java
+index 6f5eade..db82822 100644
+--- a/app/src/main/java/dev/vendicated/vencord/Constants.java
++++ b/app/src/main/java/dev/vendicated/vencord/Constants.java
+@@ -2,4 +2,9 @@ package dev.vendicated.vencord;
+ 
+ public class Constants {
+     public static final String JS_BUNDLE_URL = "https://github.com/Vendicated/Vencord/releases/download/devbuild/browser.js";
++    public static final String CSS_BUNDLE_URL = "https://github.com/Vendicated/Vencord/releases/download/devbuild/browser.css";
++    public static final String DISCORD_URL = "https://discord.com/app";
++
++    /** If Vencord has not reported ready this long after the page finished loading, the loading screen is dismissed anyway. */
++    public static final long READY_TIMEOUT_MS = 15_000;
+ }
+diff --git a/app/src/main/java/dev/vendicated/vencord/HttpClient.java b/app/src/main/java/dev/vendicated/vencord/HttpClient.java
+index 924ba92..089f735 100644
+--- a/app/src/main/java/dev/vendicated/vencord/HttpClient.java
++++ b/app/src/main/java/dev/vendicated/vencord/HttpClient.java
+@@ -1,14 +1,15 @@
+ package dev.vendicated.vencord;
+ 
+-import android.app.Activity;
+-import android.content.res.Resources;
++import android.content.Context;
+ 
+ import androidx.annotation.NonNull;
+ 
+ import java.io.*;
+ import java.net.HttpURLConnection;
+ import java.net.URL;
++import java.nio.charset.StandardCharsets;
+ import java.util.Locale;
++import java.util.regex.Pattern;
+ 
+ public class HttpClient {
+     public static final class HttpException extends IOException {
+@@ -40,32 +41,163 @@ public class HttpClient {
+         }
+     }
+ 
+-    public static String VencordRuntime;
+-    public static String VencordMobileRuntime;
++    public interface ProgressListener {
++        /** Called from the download thread. {@code percent} is 0-100, or -1 if the total size is unknown. */
++        void onProgress(int percent);
++    }
++
++    private static final int CONNECT_TIMEOUT_MS = 15_000;
++    private static final int READ_TIMEOUT_MS = 30_000;
++    /** Share of the overall progress bar taken up by the (large) JS bundle. The CSS gets the rest. */
++    private static final int JS_PROGRESS_END = 85;
++
++    private static final Pattern SCRIPT_CLOSE = Pattern.compile("</script", Pattern.CASE_INSENSITIVE);
++    private static final Pattern STYLE_CLOSE = Pattern.compile("</style", Pattern.CASE_INSENSITIVE);
++
++    public static volatile String VencordRuntime;
++    public static volatile String VencordMobileRuntime;
++    public static volatile String VencordCss;
++
++    /**
++     * Ready-to-insert HTML ({@code <script>}s + {@code <style>}) that is spliced into the very top of Discord's
++     * {@code <head>} so Vencord is running before any of Discord's own scripts. See {@link VWebviewClient}.
++     */
++    public static volatile byte[] VencordInjection;
+ 
+-    public static void fetchVencord(Activity activity) throws IOException {
+-        if (VencordRuntime != null) return;
++    /**
++     * Downloads Vencord (falling back to the last cached copy if the network fails) and prepares the injection.
++     * Blocks, so never call this on the UI thread.
++     */
++    public static synchronized void fetchVencord(Context context, ProgressListener listener) throws IOException {
++        if (VencordRuntime != null && VencordMobileRuntime != null && VencordInjection != null) return;
+ 
+-        var res = activity.getResources();
+-        try (var is = res.openRawResource(R.raw.vencord_mobile)) {
+-            VencordMobileRuntime = readAsText(is);
++        report(listener, 0);
++
++        String mobile;
++        try (var is = context.getResources().openRawResource(R.raw.vencord_mobile)) {
++            mobile = readAsText(is);
+         }
+ 
+-        var conn = fetch(Constants.JS_BUNDLE_URL);
+-        try (var is = conn.getInputStream()) {
+-            VencordRuntime = readAsText(is);
++        File dir = context.getFilesDir();
++
++        String js = download(Constants.JS_BUNDLE_URL, new File(dir, "vencord-browser.js"), listener, 0, JS_PROGRESS_END, true);
++
++        String css;
++        try {
++            css = download(Constants.CSS_BUNDLE_URL, new File(dir, "vencord-browser.css"), listener, JS_PROGRESS_END, 100, false);
++        } catch (IOException ex) {
++            // Non-fatal: vencord_mobile.js falls back to a <link> tag when no inline stylesheet is present
++            Logger.w("Failed to fetch Vencord CSS, falling back to <link>: " + ex.getMessage());
++            css = "";
+         }
++
++        report(listener, 100);
++
++        VencordMobileRuntime = mobile;
++        VencordCss = css;
++        VencordInjection = buildInjection(js, mobile, css);
++        VencordRuntime = js;
++    }
++
++    private static void report(ProgressListener listener, int percent) {
++        if (listener != null) listener.onProgress(percent);
++    }
++
++    private static String download(String url, File cache, ProgressListener listener, int from, int to, boolean isJs) throws IOException {
++        try {
++            String text = downloadText(url, listener, from, to);
++            if (text.isEmpty() || (isJs && !text.contains("Vencord"))) {
++                throw new IOException("Unexpected response from " + url);
++            }
++            writeCache(cache, text);
++            return text;
++        } catch (IOException ex) {
++            if (cache.isFile()) {
++                Logger.w("Download of " + url + " failed (" + ex.getMessage() + "), using cached copy");
++                try (var is = new FileInputStream(cache)) {
++                    return readAsText(is);
++                }
++            }
++            throw ex;
++        }
++    }
++
++    private static String downloadText(String url, ProgressListener listener, int from, int to) throws IOException {
++        var conn = open(url);
++        try {
++            long total = conn.getContentLength(); // -1 when unknown (e.g. transparently gzipped)
++            if (total <= 0) report(listener, -1);
++
++            try (var is = conn.getInputStream(); var baos = new ByteArrayOutputStream(total > 0 ? (int) total : 1 << 20)) {
++                byte[] buf = new byte[16384]; // 16 KB
++                long read = 0;
++                int lastPercent = -2;
++                int n;
++                while ((n = is.read(buf)) > -1) {
++                    baos.write(buf, 0, n);
++                    read += n;
++                    if (total > 0) {
++                        int p = from + (int) Math.min((long) (to - from), (to - from) * read / total);
++                        if (p != lastPercent) {
++                            lastPercent = p;
++                            report(listener, p);
++                        }
++                    }
++                }
++                //noinspection CharsetObjectCanBeUsed sdk33 api
++                return baos.toString("UTF-8");
++            }
++        } finally {
++            conn.disconnect();
++        }
++    }
++
++    private static void writeCache(File cache, String text) {
++        // write to a temp file first so a crash mid-write can never leave a truncated bundle behind
++        var tmp = new File(cache.getPath() + ".tmp");
++        try (var os = new FileOutputStream(tmp)) {
++            os.write(text.getBytes(StandardCharsets.UTF_8));
++            os.flush();
++        } catch (IOException ex) {
++            Logger.w("Failed to cache " + cache.getName() + ": " + ex.getMessage());
++            //noinspection ResultOfMethodCallIgnored
++            tmp.delete();
++            return;
++        }
++        if (!tmp.renameTo(cache)) {
++            Logger.w("Failed to move cached file into place: " + cache.getName());
++            //noinspection ResultOfMethodCallIgnored
++            tmp.delete();
++        }
++    }
++
++    private static byte[] buildInjection(String js, String mobile, String css) {
++        var sb = new StringBuilder(js.length() + mobile.length() + css.length() + 128);
++        // Two separate script tags: the bundle must stay at the top of its own script so its "use strict" directive applies
++        sb.append("<script>").append(escape(SCRIPT_CLOSE, js)).append("</script>");
++        sb.append("<script>").append(escape(SCRIPT_CLOSE, mobile)).append("</script>");
++        if (!css.isEmpty()) {
++            sb.append("<style id=\"vencord-css\">").append(escape(STYLE_CLOSE, css)).append("</style>");
++        }
++        return sb.toString().getBytes(StandardCharsets.UTF_8);
++    }
++
++    /** Prevents the content from prematurely closing the surrounding tag. {@code <\/script} is identical to {@code </script} in JS strings. */
++    private static String escape(Pattern closeTag, String content) {
++        return closeTag.matcher(content).replaceAll("<\\\\/" + (closeTag == SCRIPT_CLOSE ? "script" : "style"));
+     }
+ 
+-    private static HttpURLConnection fetch(String url) throws IOException {
++    private static HttpURLConnection open(String url) throws IOException {
+         var conn = (HttpURLConnection) new URL(url).openConnection();
++        conn.setConnectTimeout(CONNECT_TIMEOUT_MS);
++        conn.setReadTimeout(READ_TIMEOUT_MS);
+         if (conn.getResponseCode() >= 300) {
+             throw new HttpException(conn);
+         }
+         return conn;
+     }
+ 
+-    private static String readAsText(InputStream is) throws IOException {
++    static String readAsText(InputStream is) throws IOException {
+         try (var baos = new ByteArrayOutputStream()) {
+             int n;
+             byte[] buf = new byte[16384]; // 16 KB
+diff --git a/app/src/main/java/dev/vendicated/vencord/MainActivity.java b/app/src/main/java/dev/vendicated/vencord/MainActivity.java
+index 5702975..ed86783 100644
+--- a/app/src/main/java/dev/vendicated/vencord/MainActivity.java
++++ b/app/src/main/java/dev/vendicated/vencord/MainActivity.java
+@@ -5,21 +5,51 @@ import android.app.Activity;
+ import android.content.Intent;
+ import android.net.Uri;
+ import android.os.Bundle;
+-import android.os.StrictMode;
++import android.os.Handler;
++import android.os.Looper;
+ import android.view.KeyEvent;
++import android.view.View;
+ import android.webkit.ValueCallback;
+ import android.webkit.WebView;
++import android.widget.Button;
++import android.widget.ProgressBar;
++import android.widget.TextView;
++import android.widget.Toast;
++
++import org.json.JSONObject;
+ 
+ import java.io.IOException;
+ import java.util.Objects;
+ 
+ public class MainActivity extends Activity {
+     public static final int FILECHOOSER_RESULTCODE = 8485;
+-    private boolean wvInitialized = false;
++
++    private final Handler handler = new Handler(Looper.getMainLooper());
++
+     private WebView wv;
++    private View loadingOverlay;
++    private ProgressBar progressBar;
++    private TextView statusText;
++    private Button retryButton;
++
++    /** True once the WebView has been told to load Discord (i.e. Vencord was downloaded). */
++    private boolean wvInitialized = false;
++    /** True once Vencord has reported that it hooked into Discord. */
++    private boolean vencordReady = false;
++    private boolean overlayVisible = true;
++    private boolean destroyed = false;
++    /** A discord link we were opened with before Vencord finished downloading. */
++    private Uri pendingUrl;
+ 
+     public ValueCallback<Uri[]> filePathCallback;
+ 
++    private final Runnable readyTimeout = () -> {
++        if (vencordReady || destroyed) return;
++        Logger.w("Vencord did not report ready in time");
++        Toast.makeText(this, R.string.vencord_failed_toast, Toast.LENGTH_LONG).show();
++        hideOverlay();
++    };
++
+     @SuppressLint("SetJavaScriptEnabled") // mad? watch this swag
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+@@ -31,10 +61,13 @@ public class MainActivity extends Activity {
+         setContentView(R.layout.activity_main);
+ 
+         wv = findViewById(R.id.webview);
++        loadingOverlay = findViewById(R.id.loading_overlay);
++        progressBar = findViewById(R.id.progress_bar);
++        statusText = findViewById(R.id.status_text);
++        retryButton = findViewById(R.id.retry_button);
++        retryButton.setOnClickListener(v -> startLoading());
+ 
+-        explodeAndroid();
+-
+-        wv.setWebViewClient(new VWebviewClient());
++        wv.setWebViewClient(new VWebviewClient(this));
+         wv.setWebChromeClient(new VChromeClient(this));
+ 
+         var s = wv.getSettings();
+@@ -44,30 +77,136 @@ public class MainActivity extends Activity {
+ 
+         wv.addJavascriptInterface(new VencordNative(this, wv), "VencordMobileNative");
+ 
+-        try {
+-            HttpClient.fetchVencord(this);
+-        } catch (IOException ex) {
+-            Logger.e("Failed to fetch Vencord", ex);
+-            return;
+-        }
+-
+         Intent intent = getIntent();
+         if (Objects.equals(intent.getAction(), Intent.ACTION_VIEW)) {
+-            Uri data = intent.getData();
+-            if (data != null) handleUrl(intent.getData());
+-        } else {
+-            wv.loadUrl("https://discord.com/app");
++            handleUrl(intent.getData());
+         }
+ 
++        startLoading();
++    }
++
++    /**
++     * Downloads Vencord on a background thread (reporting progress to the loading screen), then loads Discord.
++     * Also used by the retry button.
++     */
++    private void startLoading() {
++        retryButton.setVisibility(View.GONE);
++        showOverlay();
++        setStatus(R.string.status_downloading, 0);
++
++        var appContext = getApplicationContext();
++        new Thread(() -> {
++            try {
++                HttpClient.fetchVencord(appContext, percent -> runOnUiThread(() -> {
++                    if (!destroyed) setStatus(R.string.status_downloading, percent);
++                }));
++            } catch (IOException ex) {
++                Logger.e("Failed to fetch Vencord", ex);
++                runOnUiThread(() -> showError(R.string.status_download_failed));
++                return;
++            }
++
++            runOnUiThread(this::loadDiscord);
++        }, "vencord-download").start();
++    }
++
++    private void loadDiscord() {
++        if (destroyed) return;
++
+         wvInitialized = true;
++        vencordReady = false;
++        setStatus(R.string.status_loading_discord, 0);
++
++        var url = pendingUrl != null ? pendingUrl.toString() : Constants.DISCORD_URL;
++        pendingUrl = null;
++        wv.loadUrl(url);
++    }
++
++    // ----- loading screen -----
++
++    /** @param percent 0-100, or negative for "unknown" (shows an indeterminate bar) */
++    private void setStatus(int statusRes, int percent) {
++        if (percent < 0) {
++            statusText.setText(getString(statusRes).replace("%1$d%%", "").trim());
++            progressBar.setIndeterminate(true);
++        } else {
++            statusText.setText(getString(statusRes, percent));
++            progressBar.setIndeterminate(false);
++            progressBar.setProgress(percent);
++        }
+     }
+ 
++    private void showError(int messageRes) {
++        if (destroyed) return;
++        showOverlay();
++        statusText.setText(messageRes);
++        progressBar.setIndeterminate(false);
++        progressBar.setProgress(0);
++        retryButton.setVisibility(View.VISIBLE);
++    }
++
++    private void showOverlay() {
++        overlayVisible = true;
++        loadingOverlay.animate().cancel();
++        loadingOverlay.setAlpha(1f);
++        loadingOverlay.setVisibility(View.VISIBLE);
++    }
++
++    private void hideOverlay() {
++        if (!overlayVisible) return;
++        overlayVisible = false;
++        handler.removeCallbacks(readyTimeout);
++        loadingOverlay.animate().alpha(0f).setDuration(250)
++                .withEndAction(() -> {
++                    if (!overlayVisible) loadingOverlay.setVisibility(View.GONE);
++                });
++    }
++
++    // ----- callbacks from the WebView / Vencord -----
++
++    /** WebChromeClient progress of the main frame (0-100). */
++    public void onLoadProgress(int progress) {
++        if (!overlayVisible || vencordReady || !wvInitialized || retryButton.getVisibility() == View.VISIBLE) return;
++
++        if (progress < 100) {
++            setStatus(R.string.status_loading_discord, progress);
++        } else {
++            setStatus(R.string.status_starting_vencord, -1);
++        }
++    }
++
++    public void onPageFinished() {
++        // Vencord should report ready on its own shortly. If it doesn't, don't leave the user stuck on the loading screen.
++        handler.removeCallbacks(readyTimeout);
++        if (!vencordReady) handler.postDelayed(readyTimeout, Constants.READY_TIMEOUT_MS);
++    }
++
++    public void onMainFrameError() {
++        runOnUiThread(() -> {
++            if (vencordReady || !overlayVisible) return;
++            handler.removeCallbacks(readyTimeout);
++            showError(R.string.status_load_failed);
++        });
++    }
++
++    /** Called (from a JS bridge thread) when Vencord has hooked into Discord. */
++    public void onVencordReady() {
++        runOnUiThread(() -> {
++            if (destroyed) return;
++            vencordReady = true;
++            hideOverlay();
++        });
++    }
++
++    // ----- activity plumbing -----
++
+     @Override
+     public boolean onKeyDown(int keyCode, KeyEvent event) {
+-        if (keyCode == KeyEvent.KEYCODE_BACK && wv != null) {
++        if (keyCode == KeyEvent.KEYCODE_BACK && wv != null && vencordReady) {
+             runOnUiThread(() -> wv.evaluateJavascript("VencordMobile.onBackPress()", r -> {
+-                if ("false".equals(r))
+-                    this.onBackPressed ();
++                // true = Vencord handled it. Anything else (false, or null if the script is missing/broken) = leave the app
++                if (!"true".equals(r))
++                    this.onBackPressed();
+             }));
+             return true;
+         }
+@@ -103,23 +242,18 @@ public class MainActivity extends Activity {
+         filePathCallback = null;
+     }
+ 
+-    private void explodeAndroid() {
+-        StrictMode.setThreadPolicy(
+-                new StrictMode.ThreadPolicy.Builder()
+-                        // trolley
+-                        .permitNetwork()
+-                        .build()
+-        );
+-    }
+-
+     public void handleUrl(Uri url) {
+-        if (url != null) {
+-            if (!url.getAuthority().equals("discord.com")) return;
+-            if (!wvInitialized) {
+-                wv.loadUrl(url.toString());
+-            } else {
+-                wv.evaluateJavascript("Vencord.Webpack.Common.NavigationRouter.transitionTo(\"" + url.getPath() + "\")", null);
+-            }
++        if (url == null || !"discord.com".equals(url.getAuthority())) return;
++
++        if (!wvInitialized) {
++            // Vencord is still downloading, loadDiscord() will pick this up
++            pendingUrl = url;
++        } else if (!vencordReady) {
++            wv.loadUrl(url.toString());
++        } else {
++            var path = url.getPath();
++            if (path == null) path = "/";
++            wv.evaluateJavascript("Vencord.Webpack.Common.NavigationRouter.transitionTo(" + JSONObject.quote(path) + ")", null);
+         }
+     }
+ 
+@@ -129,4 +263,12 @@ public class MainActivity extends Activity {
+         Uri data = intent.getData();
+         if (data != null) handleUrl(data);
+     }
++
++    @Override
++    protected void onDestroy() {
++        destroyed = true;
++        handler.removeCallbacksAndMessages(null);
++        if (wv != null) wv.destroy();
++        super.onDestroy();
++    }
+ }
+diff --git a/app/src/main/java/dev/vendicated/vencord/VChromeClient.java b/app/src/main/java/dev/vendicated/vencord/VChromeClient.java
+index 3d3c326..5407cad 100644
+--- a/app/src/main/java/dev/vendicated/vencord/VChromeClient.java
++++ b/app/src/main/java/dev/vendicated/vencord/VChromeClient.java
+@@ -34,6 +34,12 @@ public class VChromeClient extends WebChromeClient {
+         return true;
+     }
+ 
++    @Override
++    public void onProgressChanged(WebView view, int newProgress) {
++        super.onProgressChanged(view, newProgress);
++        activity.onLoadProgress(newProgress);
++    }
++
+     @Override
+     public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
+         if (activity.filePathCallback != null)
+diff --git a/app/src/main/java/dev/vendicated/vencord/VWebviewClient.java b/app/src/main/java/dev/vendicated/vencord/VWebviewClient.java
+index 458fba7..5a3d2dd 100644
+--- a/app/src/main/java/dev/vendicated/vencord/VWebviewClient.java
++++ b/app/src/main/java/dev/vendicated/vencord/VWebviewClient.java
+@@ -1,18 +1,35 @@
+ package dev.vendicated.vencord;
+ 
+ import android.content.Intent;
+-import android.graphics.Bitmap;
+-import android.view.View;
++import android.net.Uri;
+ import android.webkit.*;
+ 
+ import androidx.annotation.Nullable;
+ 
++import org.json.JSONObject;
++
++import java.io.ByteArrayInputStream;
++import java.io.ByteArrayOutputStream;
+ import java.io.IOException;
++import java.io.InputStream;
+ import java.net.HttpURLConnection;
+ import java.net.URL;
++import java.nio.charset.StandardCharsets;
+ import java.util.*;
++import java.util.regex.Matcher;
++import java.util.regex.Pattern;
+ 
+ public class VWebviewClient extends WebViewClient {
++    private static final Pattern HEAD_TAG = Pattern.compile("<head(\\s[^>]*)?>", Pattern.CASE_INSENSITIVE);
++    private static final Pattern HTML_TAG = Pattern.compile("<html(\\s[^>]*)?>", Pattern.CASE_INSENSITIVE);
++    private static final Pattern CHARSET = Pattern.compile("charset=\"?([\\w-]+)", Pattern.CASE_INSENSITIVE);
++
++    private final MainActivity activity;
++
++    public VWebviewClient(MainActivity activity) {
++        this.activity = activity;
++    }
++
+     @Override
+     public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+         var url = request.getUrl();
+@@ -26,51 +43,185 @@ public class VWebviewClient extends WebViewClient {
+     }
+ 
+     @Override
+-    public void onPageStarted(WebView view, String url, Bitmap favicon) {
+-        view.evaluateJavascript(HttpClient.VencordRuntime, null);
+-        view.evaluateJavascript(HttpClient.VencordMobileRuntime, null);
++    public void onPageFinished(WebView view, String url) {
++        super.onPageFinished(view, url);
++        activity.onPageFinished();
++        injectLateIfMissing(view, url);
+     }
+ 
+     @Override
+-    public void onPageFinished(WebView view, String url) {
+-        view.setVisibility(View.VISIBLE);
+-        super.onPageFinished(view, url);
++    public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
++        super.onReceivedError(view, request, error);
++        if (request.isForMainFrame()) activity.onMainFrameError();
++    }
++
++    /**
++     * Safety net. Vencord is normally injected into the HTML response itself (see {@link #doFetch}), which is the only
++     * point that is guaranteed to run before Discord's webpack loads. If that did not happen for some reason
++     * (request not intercepted, unexpected charset/encoding, no usable insertion point), inject now so that at
++     * least the page doesn't end up without Vencord entirely.
++     */
++    private void injectLateIfMissing(WebView view, String url) {
++        if (!isDiscordUrl(url)) return;
++
++        final String js = HttpClient.VencordRuntime;
++        final String mobile = HttpClient.VencordMobileRuntime;
++        if (js == null || mobile == null) return;
++
++        view.evaluateJavascript("typeof window.Vencord", result -> {
++            if (!"\"undefined\"".equals(result)) return;
++
++            Logger.w("Vencord was not present after page load, injecting late (some plugins may not work)");
++            view.evaluateJavascript(js, null);
++            view.evaluateJavascript(mobile, null);
++
++            final String css = HttpClient.VencordCss;
++            if (css != null && !css.isEmpty()) {
++                view.evaluateJavascript(
++                        "(()=>{const s=document.createElement('style');s.id='vencord-css';s.textContent="
++                                + JSONObject.quote(css)
++                                + ";document.documentElement.appendChild(s)})()",
++                        null
++                );
++            }
++        });
+     }
+ 
+     @Nullable
+     @Override
+     public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest req) {
+         var uri = req.getUrl();
+-        if (req.isForMainFrame() || req.getUrl().getPath().endsWith(".css")) {
+-            try {
+-                return doFetch(req);
+-            } catch (IOException ex) {
+-                Logger.e("Error during shouldInterceptRequest", ex);
+-            }
++        var scheme = uri.getScheme();
++        if (!"https".equals(scheme) && !"http".equals(scheme)) return null;
++
++        boolean mainFrame = req.isForMainFrame();
++        boolean css = isCss(uri);
++        if (!mainFrame && !css) return null;
++        // We can't forward a request body, so leave form posts etc. to the WebView
++        if (mainFrame && !"GET".equalsIgnoreCase(req.getMethod())) return null;
++
++        try {
++            return doFetch(req, mainFrame, css);
++        } catch (Exception ex) { // IOException, or IllegalArgumentException from an unrepresentable response
++            Logger.e("Error during shouldInterceptRequest", ex);
+         }
+         return null;
+     }
+ 
+-    private WebResourceResponse doFetch(WebResourceRequest req) throws IOException {
++    private WebResourceResponse doFetch(WebResourceRequest req, boolean mainFrame, boolean css) throws IOException {
+         var url = req.getUrl().toString();
+         var conn = (HttpURLConnection) new URL(url).openConnection();
++        conn.setConnectTimeout(15_000);
++        conn.setReadTimeout(30_000);
+         conn.setRequestMethod(req.getMethod());
+         for (var h : req.getRequestHeaders().entrySet()) {
++            // For the document we need the body as plain text to be able to modify it, so let HttpURLConnection
++            // negotiate and transparently decompress gzip itself instead of forwarding the WebView's Accept-Encoding
++            if (mainFrame && "Accept-Encoding".equalsIgnoreCase(h.getKey())) continue;
+             conn.setRequestProperty(h.getKey(), h.getValue());
+         }
+ 
+         var code = conn.getResponseCode();
++        // WebResourceResponse can't represent redirects (3xx), let the WebView handle those itself
++        if (code >= 300 && code < 400) {
++            conn.disconnect();
++            return null;
++        }
+         var msg = conn.getResponseMessage();
++        if (msg == null || msg.isEmpty()) msg = code >= 200 && code < 300 ? "OK" : "Status " + code;
+ 
+         var headers = conn.getHeaderFields();
+         var modifiedHeaders = new HashMap<String, String>(headers.size());
+         for (var header : headers.entrySet()) {
+-            if (!"Content-Security-Policy".equalsIgnoreCase(header.getKey())) {
+-                modifiedHeaders.put(header.getKey(), header.getValue().get(0));
++            var key = header.getKey();
++            if (key == null || header.getValue().isEmpty()) continue; // null key is the status line
++            if (!"Content-Security-Policy".equalsIgnoreCase(key)) {
++                modifiedHeaders.put(key, header.getValue().get(0));
+             }
+         }
+-        if (url.endsWith(".css")) modifiedHeaders.put("Content-Type", "text/css");
+ 
+-        return new WebResourceResponse(modifiedHeaders.getOrDefault("Content-Type", "application/octet-stream"), "utf-8", code, msg, modifiedHeaders, conn.getInputStream());
++        String contentType = conn.getContentType();
++        if (css) contentType = "text/css";
++        String mime = contentType == null ? "application/octet-stream" : contentType.split(";")[0].trim();
++        String charset = parseCharset(contentType);
++        if (css) modifiedHeaders.put("Content-Type", "text/css");
++
++        InputStream body = conn.getInputStream();
++
++        if (mainFrame && "text/html".equalsIgnoreCase(mime) && isDiscordHost(req.getUrl().getHost())) {
++            var encoding = conn.getContentEncoding();
++            boolean plainBody = encoding == null || "identity".equalsIgnoreCase(encoding);
++            boolean utf8 = charset == null || "utf-8".equalsIgnoreCase(charset) || "utf8".equalsIgnoreCase(charset);
++            var injection = HttpClient.VencordInjection;
++
++            if (plainBody && utf8 && injection != null) {
++                byte[] original = readAll(body);
++                byte[] injected = inject(original, injection);
++                if (injected != null) {
++                    removeHeader(modifiedHeaders, "Content-Length");
++                    removeHeader(modifiedHeaders, "Content-Encoding");
++                    body = new ByteArrayInputStream(injected);
++                } else {
++                    Logger.w("No <head> or <html> tag found in document, Vencord could not be injected up front");
++                    body = new ByteArrayInputStream(original);
++                }
++            }
++        }
++
++        return new WebResourceResponse(mime, charset != null ? charset : "utf-8", code, msg, modifiedHeaders, body);
++    }
++
++    /** Splices the injection in right after the opening {@code <head>} tag. Returns null if there is no usable spot. */
++    @Nullable
++    private static byte[] inject(byte[] document, byte[] injection) throws IOException {
++        var html = new String(document, StandardCharsets.UTF_8);
++
++        Matcher m = HEAD_TAG.matcher(html);
++        if (!m.find()) {
++            m = HTML_TAG.matcher(html);
++            if (!m.find()) return null;
++        }
++        int at = m.end();
++
++        var out = new ByteArrayOutputStream(document.length + injection.length);
++        out.write(html.substring(0, at).getBytes(StandardCharsets.UTF_8));
++        out.write(injection);
++        out.write(html.substring(at).getBytes(StandardCharsets.UTF_8));
++        return out.toByteArray();
++    }
++
++    private static byte[] readAll(InputStream is) throws IOException {
++        try (var in = is; var baos = new ByteArrayOutputStream()) {
++            byte[] buf = new byte[16384];
++            int n;
++            while ((n = in.read(buf)) > -1) baos.write(buf, 0, n);
++            return baos.toByteArray();
++        }
++    }
++
++    private static void removeHeader(Map<String, String> headers, String name) {
++        for (var it = headers.keySet().iterator(); it.hasNext(); ) {
++            if (name.equalsIgnoreCase(it.next())) it.remove();
++        }
++    }
++
++    @Nullable
++    private static String parseCharset(@Nullable String contentType) {
++        if (contentType == null) return null;
++        var m = CHARSET.matcher(contentType);
++        return m.find() ? m.group(1) : null;
++    }
++
++    private static boolean isCss(Uri uri) {
++        var path = uri.getPath();
++        return path != null && path.endsWith(".css");
++    }
++
++    private static boolean isDiscordHost(@Nullable String host) {
++        return host != null && (host.equals("discord.com") || host.endsWith(".discord.com"));
++    }
++
++    private static boolean isDiscordUrl(@Nullable String url) {
++        return url != null && isDiscordHost(Uri.parse(url).getHost());
+     }
+ }
+diff --git a/app/src/main/java/dev/vendicated/vencord/VencordNative.java b/app/src/main/java/dev/vendicated/vencord/VencordNative.java
+index 950a9ca..e4cca9b 100644
+--- a/app/src/main/java/dev/vendicated/vencord/VencordNative.java
++++ b/app/src/main/java/dev/vendicated/vencord/VencordNative.java
+@@ -1,14 +1,13 @@
+ package dev.vendicated.vencord;
+ 
+-import android.app.Activity;
+ import android.webkit.JavascriptInterface;
+ import android.webkit.WebView;
+ 
+ public class VencordNative {
+     private final WebView wv;
+-    private final Activity activity;
++    private final MainActivity activity;
+ 
+-    public VencordNative(Activity activity, WebView wv) {
++    public VencordNative(MainActivity activity, WebView wv) {
+         this.activity = activity;
+         this.wv = wv;
+     }
+@@ -23,4 +22,10 @@ public class VencordNative {
+                 activity.getActionBar();
+         });
+     }
++
++    /** Called by vencord_mobile.js once Vencord has hooked into Discord's webpack. Dismisses the loading screen. */
++    @JavascriptInterface
++    public void onVencordReady() {
++        activity.onVencordReady();
++    }
+ }
+diff --git a/app/src/main/res/layout/activity_main.xml b/app/src/main/res/layout/activity_main.xml
+index f3e56e0..f78e0ce 100644
+--- a/app/src/main/res/layout/activity_main.xml
++++ b/app/src/main/res/layout/activity_main.xml
+@@ -1,15 +1,62 @@
+ <?xml version="1.0" encoding="utf-8"?>
+-<android.widget.RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
++<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:tools="http://schemas.android.com/tools"
+     android:layout_width="match_parent"
+     android:layout_height="match_parent"
+     tools:context=".MainActivity">
+-    <ProgressBar android:indeterminate="true" android:layout_width="40dp"
+-        android:layout_height="40dp" android:layout_centerInParent="true" />
+ 
++    <!-- Kept visible (not INVISIBLE/GONE) underneath the overlay so Chromium doesn't throttle Discord while it boots -->
+     <WebView
+         android:id="@+id/webview"
+         android:layout_width="match_parent"
++        android:layout_height="match_parent" />
++
++    <LinearLayout
++        android:id="@+id/loading_overlay"
++        android:layout_width="match_parent"
+         android:layout_height="match_parent"
+-        android:visibility="invisible" />
+-</android.widget.RelativeLayout>
+\ No newline at end of file
++        android:background="@color/background"
++        android:clickable="true"
++        android:focusable="true"
++        android:gravity="center"
++        android:orientation="vertical"
++        android:paddingStart="48dp"
++        android:paddingEnd="48dp">
++
++        <TextView
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:text="@string/app_name"
++            android:textColor="@color/text_primary"
++            android:textSize="32sp"
++            android:textStyle="bold" />
++
++        <ProgressBar
++            android:id="@+id/progress_bar"
++            style="?android:attr/progressBarStyleHorizontal"
++            android:layout_width="match_parent"
++            android:layout_height="wrap_content"
++            android:layout_marginTop="28dp"
++            android:indeterminate="true"
++            android:indeterminateTint="@color/accent"
++            android:max="100"
++            android:progressTint="@color/accent" />
++
++        <TextView
++            android:id="@+id/status_text"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:layout_marginTop="12dp"
++            android:gravity="center"
++            android:textColor="@color/text_secondary"
++            android:textSize="14sp" />
++
++        <Button
++            android:id="@+id/retry_button"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:layout_marginTop="20dp"
++            android:text="@string/retry"
++            android:visibility="gone" />
++    </LinearLayout>
++</FrameLayout>
+diff --git a/app/src/main/res/raw/vencord_mobile.js b/app/src/main/res/raw/vencord_mobile.js
+index 819fd98..5918ccd 100644
+--- a/app/src/main/res/raw/vencord_mobile.js
++++ b/app/src/main/res/raw/vencord_mobile.js
+@@ -1,7 +1,19 @@
+ !(() => {
++    // never run twice on the same document, that would patch everything twice
++    if (window.VencordMobile) return;
++
+     const { findLazy, Common, onceReady } = Vencord.Webpack;
+     const ModalEscapeHandler = findLazy(m => m.binds?.length === 1 && m.binds[0] === "esc");
+ 
++    // tells the java side that Vencord is up so it can dismiss the loading screen
++    const notifyReady = () => {
++        try {
++            window.VencordMobileNative?.onVencordReady?.();
++        } catch (e) {
++            console.error("[VencordMobile] Failed to notify native side", e);
++        }
++    };
++
+     let isSidebarOpen = false;
+     onceReady.then(() => {
+         Common.FluxDispatcher.subscribe("MOBILE_WEB_SIDEBAR_OPEN", () => {
+@@ -10,6 +22,7 @@
+         Common.FluxDispatcher.subscribe("MOBILE_WEB_SIDEBAR_CLOSE", () => {
+             isSidebarOpen = false;
+         });
++        notifyReady();
+     });
+ 
+     window.VencordMobile = {
+@@ -35,11 +48,17 @@
+         }
+     };
+ 
+-    document.addEventListener("DOMContentLoaded", () => document.documentElement.appendChild(
+-        Object.assign(document.createElement("link"), {
+-            rel: "stylesheet",
+-            type: "text/css",
+-            href: "https://github.com/Vendicated/Vencord/releases/download/devbuild/browser.css"
+-        })
+-    ), { once: true });
++    // Normally the stylesheet is already inlined as <style id="vencord-css"> by the java side.
++    // Only fall back to fetching it over the network if that didn't happen.
++    document.addEventListener("DOMContentLoaded", () => {
++        if (document.getElementById("vencord-css")) return;
++
++        document.documentElement.appendChild(
++            Object.assign(document.createElement("link"), {
++                rel: "stylesheet",
++                type: "text/css",
++                href: "https://github.com/Vendicated/Vencord/releases/download/devbuild/browser.css"
++            })
++        );
++    }, { once: true });
+ })();
+diff --git a/app/src/main/res/values-ar/strings.xml b/app/src/main/res/values-ar/strings.xml
+new file mode 100644
+index 0000000..53b3069
+--- /dev/null
++++ b/app/src/main/res/values-ar/strings.xml
+@@ -0,0 +1,9 @@
++<resources>
++    <string name="status_downloading">جارٍ تحميل Vencord… %1$d%%</string>
++    <string name="status_loading_discord">جارٍ تحميل Discord… %1$d%%</string>
++    <string name="status_starting_vencord">جارٍ تشغيل Vencord…</string>
++    <string name="status_download_failed">تعذّر تحميل Vencord.\nتحقق من اتصالك بالإنترنت وحاول مجدداً.</string>
++    <string name="status_load_failed">تعذّر تحميل Discord.\nتحقق من اتصالك بالإنترنت وحاول مجدداً.</string>
++    <string name="retry">إعادة المحاولة</string>
++    <string name="vencord_failed_toast">فشل تشغيل Vencord، قد لا تعمل البلوقنز</string>
++</resources>
+diff --git a/app/src/main/res/values-night/colors.xml b/app/src/main/res/values-night/colors.xml
+index e2137f5..a11a266 100644
+--- a/app/src/main/res/values-night/colors.xml
++++ b/app/src/main/res/values-night/colors.xml
+@@ -1,2 +1,7 @@
+ <?xml version="1.0" encoding="utf-8"?>
+-<resources><color name="background">#363942</color></resources>
+\ No newline at end of file
++<resources>
++    <color name="background">#363942</color>
++    <color name="text_primary">#FFFFFF</color>
++    <color name="text_secondary">#B5BAC1</color>
++    <color name="accent">#7983F5</color>
++</resources>
+diff --git a/app/src/main/res/values/colors.xml b/app/src/main/res/values/colors.xml
+index e0ad4d2..2c34992 100644
+--- a/app/src/main/res/values/colors.xml
++++ b/app/src/main/res/values/colors.xml
+@@ -1,2 +1,7 @@
+ <?xml version="1.0" encoding="utf-8"?>
+-<resources><color name="background">#FFFFFF</color></resources>
+\ No newline at end of file
++<resources>
++    <color name="background">#FFFFFF</color>
++    <color name="text_primary">#1E1F22</color>
++    <color name="text_secondary">#5C5E66</color>
++    <color name="accent">#5865F2</color>
++</resources>
+diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+index 142b85e..3eaa193 100644
+--- a/app/src/main/res/values/strings.xml
++++ b/app/src/main/res/values/strings.xml
+@@ -1,3 +1,10 @@
+ <resources>
+     <string name="app_name">Vencord</string>
+-</resources>
+\ No newline at end of file
++    <string name="status_downloading">Downloading Vencord… %1$d%%</string>
++    <string name="status_loading_discord">Loading Discord… %1$d%%</string>
++    <string name="status_starting_vencord">Starting Vencord…</string>
++    <string name="status_download_failed">Couldn\'t download Vencord.\nCheck your connection and try again.</string>
++    <string name="status_load_failed">Couldn\'t load Discord.\nCheck your connection and try again.</string>
++    <string name="retry">Retry</string>
++    <string name="vencord_failed_toast">Vencord failed to start, plugins may be unavailable</string>
++</resources>
