@@ -3,12 +3,17 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Optional "run in background" mode keeps the process alive so Discord stays connected -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
     <application
         android:label="@string/app_name"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:supportsRtl="true"
         android:theme="@style/LoadingTheme"
         tools:targetApi="31"
@@ -16,7 +21,8 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:configChanges="orientation|keyboardHidden|screenSize|layoutDirection"
+            android:configChanges="orientation|keyboardHidden|keyboard|navigation|screenSize|smallestScreenSize|screenLayout|layoutDirection|density|uiMode|fontScale|locale|colorMode"
+            android:resizeableActivity="true"
             android:launchMode="singleTask"
             android:theme="@style/LoadingTheme">
             <intent-filter>
@@ -35,6 +41,11 @@
                 <data android:host="*.discordapp.com" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".KeepAliveService"
+            android:exported="false"
+            android:stopWithTask="false" />
     </application>
 
 </manifest>
