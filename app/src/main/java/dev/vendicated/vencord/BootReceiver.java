@@ -13,7 +13,7 @@ public class BootReceiver extends BroadcastReceiver {
 
         var prefs = context.getSharedPreferences(MainActivity.PREFS, Context.MODE_PRIVATE);
         // only for people who use it: background mode on, and logged in at least once
-        if (prefs.getBoolean(MainActivity.PREF_BACKGROUND, true) && prefs.getBoolean(MainActivity.PREF_EVER_READY, false)) {
+        if (Access.isValid(context) && prefs.getBoolean(MainActivity.PREF_BACKGROUND, true) && prefs.getBoolean(MainActivity.PREF_EVER_READY, false)) {
             KeepAliveService.start(context);
         }
     }

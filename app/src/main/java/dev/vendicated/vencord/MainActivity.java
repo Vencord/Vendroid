@@ -54,16 +54,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainActivity extends Activity {
     public static final int FILECHOOSER_RESULTCODE = 8485;
-    private static final int SAVE_LOG_RESULTCODE = 8486;
     private static final int NOTIFICATION_PERMISSION_CODE = 8487;
 
     public static final String PREFS = "fyocord";
     public static final String PREF_BACKGROUND = "background_mode";
-    public static final String PREF_WAKELOCK = "wake_lock";
     private static final String PREF_FAB_X = "fab_x";
     private static final String PREF_FAB_Y = "fab_y";
     private static final String PREF_CONTACT = "report_contact";
-    private static final String PREF_CODE = "report_code";
     private static final String PREF_ASKED = "setup_asked";
     public static final String PREF_EVER_READY = "ever_ready";
 
@@ -95,11 +92,27 @@ public class MainActivity extends Activity {
     private final ArrayList<MessageLog.Entry> shown = new ArrayList<>();
     private String filter = null; // null = all
     private EntryAdapter adapter;
-    private EditText reportDescription, reportContact, reportCode;
+    private EditText reportDescription, reportContact;
     private TextView reportStatus;
-    private Button reportSend, reportSave;
-    private Button aboutBackground, aboutWakelock;
-    private String pendingSaveContent;
+    private Button reportSend;
+    private Button aboutBackground;
+    // access gate
+    private View lockOverlay;
+    private EditText lockCode;
+    private TextView lockStatus, lockNote;
+    private Button lockActivate;
+    private boolean appStarted = false;
+    private final Runnable accessWatch = new Runnable() {
+        @Override
+        public void run() {
+            if (destroyed) return;
+            if (!Access.isValid(MainActivity.this)) {
+                onAccessLost();
+                return;
+            }
+            handler.postDelayed(this, 60_000);
+        }
+    };
     private boolean sending = false;
 
     private final Runnable readyTimeout = () -> {
@@ -136,10 +149,25 @@ public class MainActivity extends Activity {
         bindLoadingViews();
         bindFab();
         bindHub();
+        bindLock();
 
         Logger.i("FyoCord started. Android " + Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + "), "
                 + Build.MANUFACTURER + " " + Build.MODEL + ", WebView: " + webViewVersion()
                 + ", debug build: " + BuildConfig.DEBUG);
+
+        if (Access.isValid(this)) {
+            startApp();
+        } else {
+            showLock(false);
+        }
+    }
+
+    /** Everything that happens only once a valid access code is in place: service, WebView, loading. */
+    private void startApp() {
+        if (appStarted) return;
+        appStarted = true;
+        lockOverlay.setVisibility(View.GONE);
+        fab.setVisibility(View.VISIBLE);
 
         if (prefs.getBoolean(PREF_BACKGROUND, true)) KeepAliveService.start(this);
 
@@ -163,6 +191,129 @@ public class MainActivity extends Activity {
         }
 
         askSetupOnce();
+
+        handler.removeCallbacks(accessWatch);
+        handler.postDelayed(accessWatch, 60_000);
+        if (Access.dueForRecheck(this)) {
+            var app = getApplicationContext();
+            new Thread(() -> {
+                if (!Access.recheck(app)) runOnUiThread(this::onAccessLost);
+            }, "access-recheck").start();
+        }
+    }
+
+    // ------------------------------------------------------------------ access gate
+
+    private void bindLock() {
+        lockOverlay = findViewById(R.id.lock_overlay);
+        lockCode = findViewById(R.id.lock_code);
+        lockStatus = findViewById(R.id.lock_status);
+        lockNote = findViewById(R.id.lock_note);
+        lockActivate = findViewById(R.id.lock_activate);
+
+        var tiktok = (Button) findViewById(R.id.lock_tiktok);
+        tiktok.setText(getString(R.string.about_tiktok, Support.TIKTOK_USER));
+        tiktok.setOnClickListener(v -> openExternal(Support.tiktokUrl()));
+        pixelIcon(tiktok, R.drawable.px_tiktok);
+
+        var instagram = (Button) findViewById(R.id.lock_instagram);
+        instagram.setText(getString(R.string.about_instagram, Support.INSTAGRAM_USER));
+        instagram.setOnClickListener(v -> openExternal(Support.instagramUrl()));
+        pixelIcon(instagram, R.drawable.px_instagram);
+
+        var discord = (Button) findViewById(R.id.lock_discord);
+        discord.setText(getString(R.string.about_discord, Support.DISCORD_USER));
+        discord.setOnClickListener(v -> copyToClipboard(Support.DISCORD_USER));
+        pixelIcon(discord, R.drawable.px_discord);
+
+        lockActivate.setOnClickListener(v -> activateCode());
+    }
+
+    private void showLock(boolean ended) {
+        lockOverlay.setVisibility(View.VISIBLE);
+        fab.setVisibility(View.GONE);
+        lockNote.setVisibility(ended ? View.VISIBLE : View.GONE);
+        lockStatus.setVisibility(View.GONE);
+        lockActivate.setEnabled(true);
+        setSoftInputForLock();
+    }
+
+    private void setSoftInputForLock() {
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+    }
+
+    private void showLockStatus(int res, boolean error) {
+        lockStatus.setVisibility(View.VISIBLE);
+        lockStatus.setText(res);
+        lockStatus.setTextColor(Color.parseColor(error ? "#FF4D5E" : "#A0A0A0"));
+    }
+
+    private void activateCode() {
+        var text = lockCode.getText().toString().trim();
+        if (text.isEmpty()) {
+            showLockStatus(R.string.lock_err_empty, true);
+            return;
+        }
+        lockActivate.setEnabled(false);
+        showLockStatus(R.string.lock_activating, false);
+        hideKeyboard();
+
+        var app = getApplicationContext();
+        new Thread(() -> {
+            Access.AccessException failure = null;
+            try {
+                Access.activate(app, text);
+            } catch (Access.AccessException ex) {
+                failure = ex;
+            }
+            final var f = failure;
+            runOnUiThread(() -> {
+                if (destroyed) return;
+                lockActivate.setEnabled(true);
+                if (f == null) {
+                    lockCode.setText("");
+                    getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
+                    startApp();
+                    return;
+                }
+                switch (f.problem) {
+                    case EXPIRED:
+                        showLockStatus(R.string.lock_err_expired, true);
+                        break;
+                    case REVOKED:
+                        showLockStatus(R.string.lock_err_revoked, true);
+                        break;
+                    case OFFLINE:
+                        showLockStatus(R.string.lock_err_offline, true);
+                        break;
+                    case SERVER:
+                        showLockStatus(R.string.lock_err_server, true);
+                        break;
+                    default:
+                        showLockStatus(R.string.lock_err_invalid, true);
+                        break;
+                }
+            });
+        }, "access-activate").start();
+    }
+
+    /** The code ran out (or was switched off): tear the session down completely and ask for a new code. */
+    void onAccessLost() {
+        runOnUiThread(() -> {
+            if (destroyed) return;
+            Logger.w("Access ended, locking the app");
+            handler.removeCallbacks(accessWatch);
+            handler.removeCallbacks(readyTimeout);
+            appStarted = false;
+            hideHub();
+            detachWebView();
+            Session.release();
+            KeepAliveService.stop(this);
+            Access.clear(this);
+            overlayVisible = false;
+            loadingOverlay.setVisibility(View.GONE);
+            showLock(true);
+        });
     }
 
     /** Shown instead of the app when the previous run crashed, so the cause can be copied / sent instead of lost. */
@@ -673,16 +824,12 @@ public class MainActivity extends Activity {
     private void bindReport() {
         reportDescription = findViewById(R.id.report_description);
         reportContact = findViewById(R.id.report_contact);
-        reportCode = findViewById(R.id.report_code);
         reportStatus = findViewById(R.id.report_status);
         reportSend = findViewById(R.id.report_send);
-        reportSave = findViewById(R.id.report_save);
 
         reportContact.setText(prefs.getString(PREF_CONTACT, ""));
-        reportCode.setText(prefs.getString(PREF_CODE, ""));
 
         reportSend.setOnClickListener(v -> sendReport());
-        reportSave.setOnClickListener(v -> saveLogFile());
     }
 
     private void setReportStatus(CharSequence text, boolean error) {
@@ -695,25 +842,19 @@ public class MainActivity extends Activity {
         if (sending) return;
         var description = reportDescription.getText().toString().trim();
         var contact = reportContact.getText().toString().trim();
-        var codeText = reportCode.getText().toString().trim();
 
         if (description.length() < 5) {
             setReportStatus(getString(R.string.report_err_description), true);
             return;
         }
-        if (codeText.isEmpty()) {
-            setReportStatus(getString(R.string.report_err_code), true);
-            return;
-        }
-        final Support.Code code;
-        try {
-            code = Support.parseCode(codeText, System.currentTimeMillis() / 1000);
-        } catch (Support.CodeException ex) {
-            setReportStatus(getString(ex.expired ? R.string.report_err_code_expired : R.string.report_err_code_invalid), true);
+        // the reports are sent with the access code that unlocked the app
+        final Support.Code code = Access.code(this);
+        if (code == null) {
+            setReportStatus(getString(R.string.lock_err_invalid), true);
             return;
         }
 
-        prefs.edit().putString(PREF_CONTACT, contact).putString(PREF_CODE, codeText).apply();
+        prefs.edit().putString(PREF_CONTACT, contact).apply();
         sending = true;
         reportSend.setEnabled(false);
         setReportStatus(getString(R.string.report_sending), false);
@@ -755,25 +896,12 @@ public class MainActivity extends Activity {
         sb.append("Locale: ").append(Locale.getDefault()).append('\n');
         sb.append("State: initialized=").append(Session.initialized).append(", pageFinished=").append(Session.pageFinished)
                 .append(", injected=").append(Session.injected).append(", ready=").append(Session.ready).append('\n');
-        sb.append("Background mode: ").append(prefs.getBoolean(PREF_BACKGROUND, true))
-                .append(", wake lock: ").append(prefs.getBoolean(PREF_WAKELOCK, true)).append('\n');
+        sb.append("Background mode: ").append(prefs.getBoolean(PREF_BACKGROUND, true)).append('\n');
+        sb.append("User: ").append(DebugLog.sanitize(Access.label(this))).append('\n');
         sb.append("Logged messages stored: ").append(MessageLog.count()).append(" (contents are never sent)\n");
         sb.append("Contact: ").append(DebugLog.sanitize(contact)).append('\n');
         sb.append("Time: ").append(new Date()).append('\n');
         return sb.toString();
-    }
-
-    private void saveLogFile() {
-        pendingSaveContent = Support.buildLogFile(buildMeta(reportContact.getText().toString().trim()), DebugLog.sanitize(DebugLog.dump()));
-        var intent = new Intent(Intent.ACTION_CREATE_DOCUMENT)
-                .addCategory(Intent.CATEGORY_OPENABLE)
-                .setType("text/plain")
-                .putExtra(Intent.EXTRA_TITLE, "fyocord-log.txt");
-        try {
-            startActivityForResult(intent, SAVE_LOG_RESULTCODE);
-        } catch (ActivityNotFoundException ex) {
-            Toast.makeText(this, R.string.log_save_failed, Toast.LENGTH_SHORT).show();
-        }
     }
 
     // ---- about / contact / settings tab
@@ -791,19 +919,13 @@ public class MainActivity extends Activity {
 
         var discord = (Button) findViewById(R.id.about_discord);
         discord.setText(getString(R.string.about_discord, Support.DISCORD_USER));
-        discord.setOnClickListener(v -> {
-            var wv = Session.webView;
-            if (Session.ready && wv != null) {
-                // sends the friend request from the user's own session; falls back to copying the name on failure
-                wv.evaluateJavascript("window.__fcAddFriend&&window.__fcAddFriend()", null);
-                hideHub();
-            } else {
-                copyToClipboard(Support.DISCORD_USER);
-            }
-        });
+        discord.setOnClickListener(v -> copyToClipboard(Support.DISCORD_USER));
+
+        pixelIcon(tiktok, R.drawable.px_tiktok);
+        pixelIcon(instagram, R.drawable.px_instagram);
+        pixelIcon(discord, R.drawable.px_discord);
 
         aboutBackground = findViewById(R.id.about_background);
-        aboutWakelock = findViewById(R.id.about_wakelock);
         aboutBackground.setOnClickListener(v -> {
             boolean on = !prefs.getBoolean(PREF_BACKGROUND, true);
             prefs.edit().putBoolean(PREF_BACKGROUND, on).apply();
@@ -812,16 +934,6 @@ public class MainActivity extends Activity {
                 askBatteryExemption();
             } else {
                 KeepAliveService.stop(this);
-            }
-            updateSettingsButtons();
-        });
-        aboutWakelock.setOnClickListener(v -> {
-            boolean on = !prefs.getBoolean(PREF_WAKELOCK, true);
-            prefs.edit().putBoolean(PREF_WAKELOCK, on).apply();
-            if (prefs.getBoolean(PREF_BACKGROUND, true)) {
-                // restart so the service takes / drops its locks
-                KeepAliveService.stop(this);
-                KeepAliveService.start(this);
             }
             updateSettingsButtons();
         });
@@ -841,12 +953,19 @@ public class MainActivity extends Activity {
 
     private void updateSettingsButtons() {
         if (aboutBackground == null) return;
-        boolean bg = prefs.getBoolean(PREF_BACKGROUND, true);
-        boolean wl = prefs.getBoolean(PREF_WAKELOCK, true);
-        aboutBackground.setText(bg ? R.string.about_bg_on : R.string.about_bg_off);
-        aboutWakelock.setText(wl ? R.string.about_wake_on : R.string.about_wake_off);
-        aboutWakelock.setEnabled(bg);
-        aboutWakelock.setAlpha(bg ? 1f : 0.5f);
+        aboutBackground.setText(prefs.getBoolean(PREF_BACKGROUND, true) ? R.string.about_bg_on : R.string.about_bg_off);
+    }
+
+    /** Shows a pixel-art app logo at the start of a button, crisp (no smoothing). */
+    private void pixelIcon(Button b, int drawableRes) {
+        var d = getResources().getDrawable(drawableRes);
+        int size = (int) (26 * getResources().getDisplayMetrics().density);
+        d.setBounds(0, 0, size, size);
+        b.setCompoundDrawablesRelative(d, null, null, null);
+        b.setCompoundDrawablePadding((int) (12 * getResources().getDisplayMetrics().density));
+        b.setGravity(Gravity.CENTER_VERTICAL | Gravity.START);
+        int pad = (int) (16 * getResources().getDisplayMetrics().density);
+        b.setPadding(pad, 0, pad, 0);
     }
 
     private void openExternal(String url) {
@@ -985,20 +1104,6 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (requestCode == SAVE_LOG_RESULTCODE) {
-            if (resultCode == RESULT_OK && intent != null && intent.getData() != null && pendingSaveContent != null) {
-                try (var os = getContentResolver().openOutputStream(intent.getData())) {
-                    Objects.requireNonNull(os).write(pendingSaveContent.getBytes(StandardCharsets.UTF_8));
-                    Toast.makeText(this, R.string.log_saved, Toast.LENGTH_SHORT).show();
-                } catch (Exception ex) {
-                    Logger.e("Failed to save the log file", ex);
-                    Toast.makeText(this, R.string.log_save_failed, Toast.LENGTH_SHORT).show();
-                }
-            }
-            pendingSaveContent = null;
-            return;
-        }
-
         var callback = Session.filePathCallback;
         if (requestCode != FILECHOOSER_RESULTCODE || callback == null)
             return;
@@ -1051,6 +1156,12 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if (prefs != null && appStarted && !Access.isValid(this)) onAccessLost();
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
         if (prefs == null) return;
@@ -1074,7 +1185,7 @@ public class MainActivity extends Activity {
         if (Session.activity == this) Session.activity = null;
 
         detachWebView();
-        if (prefs.getBoolean(PREF_BACKGROUND, true)) {
+        if (appStarted && prefs.getBoolean(PREF_BACKGROUND, true)) {
             // the session (WebView, Discord connection, Vencord) lives on in Session, kept alive by the service
             KeepAliveService.start(this);
             var wv = Session.webView;

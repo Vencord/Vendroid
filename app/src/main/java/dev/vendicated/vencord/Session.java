@@ -69,6 +69,10 @@ public final class Session {
 
     /** Called by the background service: brings the whole session up without any screen. */
     static void startHeadless(Context context) {
+        if (!Access.isValid(context)) {
+            Logger.w("Headless start refused: no valid access code");
+            return;
+        }
         MAIN.post(() -> {
             ensureWebView(context);
             MessageLog.init(appContext);
@@ -81,7 +85,7 @@ public final class Session {
 
     /** Fetches Vencord (cache first), then opens Discord. Reports progress to the activity if there is one. */
     static void startLoading(Context context) {
-        if (loading) return;
+        if (loading || !Access.isValid(context)) return;
         loading = true;
         final var app = context.getApplicationContext();
         new Thread(() -> {

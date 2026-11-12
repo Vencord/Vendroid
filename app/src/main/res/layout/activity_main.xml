@@ -336,20 +336,6 @@
                             android:textColorHint="#6B6B6B"
                             android:textSize="14sp" />
 
-                        <EditText android:fontFamily="monospace"
-                            android:id="@+id/report_code"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
-                            android:background="@drawable/bg_input"
-                            android:hint="@string/report_code_hint"
-                            android:inputType="textVisiblePassword|textNoSuggestions"
-                            android:maxLines="1"
-                            android:padding="12dp"
-                            android:textColor="@color/text_primary"
-                            android:textColorHint="#6B6B6B"
-                            android:textSize="14sp" />
-
                         <TextView android:fontFamily="monospace"
                             android:id="@+id/report_status"
                             android:layout_width="match_parent"
@@ -376,17 +362,7 @@
                                 android:textColor="#000000"
                                 android:textSize="14sp" />
 
-                            <Button android:fontFamily="monospace"
-                                android:id="@+id/report_save"
-                                android:layout_width="0dp"
-                                android:layout_height="48dp"
-                                android:layout_marginStart="8dp"
-                                android:layout_weight="1"
-                                android:background="@drawable/bg_btn_secondary"
-                                android:text="@string/report_save"
-                                android:textAllCaps="false"
-                                android:textColor="@color/text_primary"
-                                android:textSize="14sp" />
+
                         </LinearLayout>
                     </LinearLayout>
                 </ScrollView>
@@ -468,15 +444,7 @@
                             android:textColor="@color/text_primary"
                             android:textSize="14sp" />
 
-                        <Button android:fontFamily="monospace"
-                            android:id="@+id/about_wakelock"
-                            android:layout_width="match_parent"
-                            android:layout_height="46dp"
-                            android:layout_marginTop="8dp"
-                            android:background="@drawable/bg_btn_secondary"
-                            android:textAllCaps="false"
-                            android:textColor="@color/text_primary"
-                            android:textSize="14sp" />
+
 
                         <Button android:fontFamily="monospace"
                             android:id="@+id/about_battery"
@@ -513,4 +481,147 @@
             </FrameLayout>
         </LinearLayout>
     </FrameLayout>
+
+    <!-- Access gate: nothing is loaded or injected until a valid code has been entered -->
+    <ScrollView
+        android:id="@+id/lock_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:clickable="true"
+        android:elevation="20dp"
+        android:fillViewport="true"
+        android:focusable="true"
+        android:scrollbars="none"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingStart="32dp"
+            android:paddingTop="56dp"
+            android:paddingEnd="32dp"
+            android:paddingBottom="32dp">
+
+            <ImageView
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:background="@drawable/bg_pixel_frame"
+                android:contentDescription="@string/app_name"
+                android:padding="4dp"
+                android:scaleType="fitXY"
+                android:src="@drawable/pixel_avatar" />
+
+            <dev.vendicated.vencord.PixelLogoView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="22dp"
+                android:fontFamily="monospace"
+                android:letterSpacing="0.2"
+                android:text="@string/lock_title"
+                android:textColor="@color/text_primary"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/lock_note"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="monospace"
+                android:gravity="center"
+                android:text="@string/lock_ended"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"
+                android:visibility="gone" />
+
+            <EditText
+                android:id="@+id/lock_code"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/bg_input"
+                android:fontFamily="monospace"
+                android:hint="@string/lock_hint"
+                android:inputType="textVisiblePassword|textNoSuggestions"
+                android:maxLines="1"
+                android:padding="14dp"
+                android:textColor="@color/text_primary"
+                android:textColorHint="#6B6B6B"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/lock_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:fontFamily="monospace"
+                android:gravity="center"
+                android:textColor="@color/danger"
+                android:textSize="13sp"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/lock_activate"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/bg_btn_primary"
+                android:fontFamily="monospace"
+                android:text="@string/lock_activate"
+                android:textColor="#000000"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="34dp"
+                android:fontFamily="monospace"
+                android:gravity="center"
+                android:text="@string/lock_request"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/lock_tiktok"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_btn_tiktok"
+                android:fontFamily="monospace"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/lock_instagram"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_btn_instagram"
+                android:fontFamily="monospace"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/lock_discord"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_btn_discord"
+                android:fontFamily="monospace"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </ScrollView>
 </FrameLayout>

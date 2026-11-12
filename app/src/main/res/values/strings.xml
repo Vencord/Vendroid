@@ -41,7 +41,7 @@
     <string name="about_instagram">Instagram  ·  %1$s</string>
     <string name="about_discord">Discord  ·  %1$s  (send friend request)</string>
     <string name="about_settings">Background &amp; performance</string>
-    <string name="about_bg_on">Background mode: ON</string>
+    <string name="about_bg_on">Background mode: ON (stays awake, even screen off)</string>
     <string name="about_bg_off">Background mode: OFF</string>
     <string name="about_wake_on">Keep awake with screen off: ON</string>
     <string name="about_wake_off">Keep awake with screen off: OFF</string>
@@ -54,4 +54,17 @@
     <string name="keepalive_title">FyoCord is running</string>
     <string name="keepalive_text">Connected in the background · tap to open</string>
     <string name="keepalive_stop">Stop</string>
+    <string name="lock_title">ACCESS CODE</string>
+    <string name="lock_hint">Enter your access code</string>
+    <string name="lock_activate">Unlock</string>
+    <string name="lock_activating">Checking the code…</string>
+    <string name="lock_request">Need a code? Ask the developer:</string>
+    <string name="lock_ended">Your access has ended. Enter a new code to continue.</string>
+    <string name="lock_err_empty">Enter the code first.</string>
+    <string name="lock_err_invalid">This code isn\'t valid. Check that you copied all of it.</string>
+    <string name="lock_err_expired">This code has expired.</string>
+    <string name="lock_err_revoked">This code has been switched off.</string>
+    <string name="lock_err_offline">No internet. The code is checked online the first time.</string>
+    <string name="lock_err_server">The code server is not answering, try again later.</string>
+    <string name="lock_welcome">Welcome %1$s</string>
 </resources>

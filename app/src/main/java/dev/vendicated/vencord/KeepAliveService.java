@@ -23,6 +23,38 @@ public class KeepAliveService extends Service {
     private static final String CHANNEL_ID = "fyocord_background";
     private static final int NOTIFICATION_ID = 1;
     private static final String ACTION_STOP = "dev.vendicated.vencord.STOP";
+    private static final String ACTION_REPOST = "dev.vendicated.vencord.REPOST";
+
+    private final Handler watchdog = new Handler(Looper.getMainLooper());
+    private final Runnable watch = new Runnable() {
+        @Override
+        public void run() {
+            // the access may have run out or been revoked while nobody was looking
+            if (!Access.isValid(KeepAliveService.this)) {
+                lockdown();
+                return;
+            }
+            if (Access.dueForRecheck(KeepAliveService.this)) {
+                var app = getApplicationContext();
+                new Thread(() -> {
+                    if (!Access.recheck(app)) watchdog.post(KeepAliveService.this::lockdown);
+                }, "access-recheck").start();
+            }
+            watchdog.postDelayed(this, 5 * 60_000L);
+        }
+    };
+
+    private void lockdown() {
+        Logger.w("Access ended: shutting the background session down");
+        var a = Session.activity;
+        if (a != null) a.onAccessLost();
+        else {
+            Session.release();
+            Access.clear(this);
+        }
+        stopForeground(true);
+        stopSelf();
+    }
 
     private PowerManager.WakeLock wakeLock;
     private WifiManager.WifiLock wifiLock;
@@ -72,6 +104,9 @@ public class KeepAliveService extends Service {
                 new Intent(this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), piFlags);
         var stop = PendingIntent.getService(this, 1,
                 new Intent(this, KeepAliveService.class).setAction(ACTION_STOP), piFlags);
+        // if the notification is swiped away it comes straight back
+        var repost = PendingIntent.getService(this, 2,
+                new Intent(this, KeepAliveService.class).setAction(ACTION_REPOST), piFlags);
 
         Notification.Builder b = Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(this, CHANNEL_ID) : new Notification.Builder(this);
         b.setContentTitle(getString(R.string.keepalive_title))
@@ -79,6 +114,8 @@ public class KeepAliveService extends Service {
                 .setSmallIcon(R.drawable.ic_stat_vendroid)
                 .setContentIntent(pending(open))
                 .setOngoing(true)
+                .setOnlyAlertOnce(true)
+                .setDeleteIntent(repost)
                 .addAction(new Notification.Action.Builder(R.drawable.ic_stat_vendroid, getString(R.string.keepalive_stop), stop).build());
         if (Build.VERSION.SDK_INT < 26) b.setPriority(Notification.PRIORITY_MIN);
 
@@ -89,6 +126,13 @@ public class KeepAliveService extends Service {
             stopSelf();
             return START_NOT_STICKY;
         }
+
+        if (!Access.isValid(this)) {
+            lockdown();
+            return START_NOT_STICKY;
+        }
+        watchdog.removeCallbacks(watch);
+        watchdog.postDelayed(watch, 60_000L);
 
         acquireLocks();
         Logger.i("Background mode: service running (wake lock " + (wakeLock != null && wakeLock.isHeld()) + ")");
@@ -102,11 +146,6 @@ public class KeepAliveService extends Service {
     }
 
     private void acquireLocks() {
-        boolean wanted = getSharedPreferences(MainActivity.PREFS, MODE_PRIVATE).getBoolean(MainActivity.PREF_WAKELOCK, true);
-        if (!wanted) {
-            releaseLocks();
-            return;
-        }
         try {
             if (wakeLock == null) {
                 var pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -143,6 +182,7 @@ public class KeepAliveService extends Service {
 
     @Override
     public void onDestroy() {
+        watchdog.removeCallbacks(watch);
         releaseLocks();
         Logger.i("Background mode: service stopped");
         super.onDestroy();

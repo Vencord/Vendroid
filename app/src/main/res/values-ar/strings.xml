@@ -39,7 +39,7 @@
     <string name="about_instagram">انستغرام  ·  %1$s</string>
     <string name="about_discord">ديسكورد  ·  %1$s  (إرسال طلب صداقة)</string>
     <string name="about_settings">الخلفية والأداء</string>
-    <string name="about_bg_on">وضع الخلفية: مفعّل</string>
+    <string name="about_bg_on">وضع الخلفية: مفعّل (يبقى مستيقظاً حتى والشاشة مطفية)</string>
     <string name="about_bg_off">وضع الخلفية: متوقف</string>
     <string name="about_wake_on">إبقاء الجهاز مستيقظاً والشاشة مطفية: مفعّل</string>
     <string name="about_wake_off">إبقاء الجهاز مستيقظاً والشاشة مطفية: متوقف</string>
@@ -52,4 +52,17 @@
     <string name="keepalive_title">FyoCord شغّال</string>
     <string name="keepalive_text">متصل بالخلفية · اضغط للفتح</string>
     <string name="keepalive_stop">إيقاف</string>
+    <string name="lock_title">كود الدخول</string>
+    <string name="lock_hint">أدخل كود الدخول</string>
+    <string name="lock_activate">فتح</string>
+    <string name="lock_activating">جارٍ فحص الكود…</string>
+    <string name="lock_request">تحتاج كوداً؟ تواصل مع المطوّر:</string>
+    <string name="lock_ended">انتهت صلاحية دخولك. أدخل كوداً جديداً للمتابعة.</string>
+    <string name="lock_err_empty">أدخل الكود أولاً.</string>
+    <string name="lock_err_invalid">الكود غير صحيح. تأكد أنك نسخته كاملاً.</string>
+    <string name="lock_err_expired">انتهت صلاحية هذا الكود.</string>
+    <string name="lock_err_revoked">تم إيقاف هذا الكود.</string>
+    <string name="lock_err_offline">لا يوجد إنترنت. الكود يُفحص عبر الإنترنت أول مرة.</string>
+    <string name="lock_err_server">خادم الأكواد لا يستجيب، حاول لاحقاً.</string>
+    <string name="lock_welcome">أهلاً %1$s</string>
 </resources>

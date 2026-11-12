@@ -38,23 +38,19 @@
         } catch {}
     };
 
-    // Sends a friend request to the developer from the user's own session (only when the button is tapped).
-    // Falls back to copying the username if Discord's API isn't reachable.
-    window.__fcAddFriend = async () => {
+    // Discord has no "open profile" link for a username, so tapping the button copies it
+    window.__fcCopyDiscord = () => {
         try {
-            const api = Vencord?.Webpack?.Common?.RestAPI;
-            if (!api) throw new Error("RestAPI unavailable");
-            await api.post({
-                url: "/users/@me/relationships",
-                body: { username: contact.discord.toLowerCase(), discriminator: null }
-            });
-            toast("\u062A\u0645 \u0625\u0631\u0633\u0627\u0644 \u0637\u0644\u0628 \u0627\u0644\u0635\u062F\u0627\u0642\u0629  \u00B7  Friend request sent");
+            native?.copyText?.(contact.discord);
         } catch (e) {
-            try {
-                native?.copyText?.(contact.discord);
-            } catch {}
-            log("W", "friend request failed, username copied instead: " + (e && e.message ? e.message : e));
+            log("W", "could not copy the Discord username: " + e);
         }
+    };
+
+    const APP_ICONS = {
+        tiktok: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAABEUlEQVR42u3cPRIBMRiA4XxGp3IIOtdxSI5D5RA01FFrNkVks5t53tYYP48vIyM20so7vJ+55v6P3b7p84uImLp9k9Q1AAAACAAAAQAgAAAEAIAAABAAAAIAQAAACAAAARizrbegbTnnbAIsQQIAQAAACIB9wGDf80/nydvjdjEBliABACAAAATAPmC0T/D9GoU/CpsAS5AAABAAAAIw3D6gdO4lNb7ejgkQAAACAEAAAOj/ALlQmuF8fc/HNwGWIAEAIAAABCD5PWBxla7/f/y8TIAAABAAAAIAQL9F73M/zV9g4VxR7eurPbdkAixBAAQAgAAA0BL3AUvfJ6z9/wMmAAAAAQAgAAAkSZIkSTP0BSSRX/hVRsLEAAAAAElFTkSuQmCC",
+        instagram: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAABMklEQVR42u3dvY0CMRCAUQ8iggbIiaAcUjoB0i1lU8pZInIaIDYd4GBleX/eF3O6E08zshEHkUb2Pt9zWnHHoYsxP79JahoAAAAEAIAArLOofc4/XJ+zfoI+/aXqPcEEWEEABACAAABQi3tA7XP+/v6KOT9B3+6Ua94TTIAVBEAAAAgAAE3xHlD7nJ9zbvq+ooiIlvcEE2AFARAAAAIAQA3a1v4FpXP+2HP43P8+E2AFARAAAAIAQEu8Byy93W34/4D+YQKsIAEAIAAABADAwopCAEyAAAAQAAACAEAAAAgAAAEAIABpBe8LKr0mvvz/EzYBVpAAABAAAAKQfG5o8rmhJsAKEgAAAgBAAHyPWPI9YrKCAAgAAAEAoIndA2rfE+Ze6ZxvAqwgAQAgAAAEYIL9AH3XShF97bDGAAAAAElFTkSuQmCC",
+        discord: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAA5klEQVR42u3dyw2EIBRA0Ydxa4E2YFE2YIEWgCW4IPhUzl3Px+EMZEyGECFJkiRptMrdA2qttekNSilfHqDen3/yHcwNAAAAAgBAAAa9D2j9nSszAIAAABAAAAIAQAAACAAAAQAgAK9vbn2BdTubnn/sS+oAZF+/GWAJAiAAAAQAgAAAEAAAAgBAAAAo7A8wAwQAgAAAEAAAAgBAAAAIAAABAKDI3x8Qnf9/n13v/QtmgCUIgAAAEAAAih+eHzD8ADs/wBIkAAAEAIAAfPA+4O/njGVfvxlgCQIgAAAEAIAkSZIk6YEujLMlmOHdKoUAAAAASUVORK5CYII="
     };
 
     const ICON = "data:image/png;base64,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";
@@ -88,14 +84,13 @@
         return h("svg", { className: "fc-title", width: w, height: hgt, viewBox: "0 0 " + w + " " + hgt, shapeRendering: "crispEdges", "aria-label": word }, rects);
     };
 
-    // 8x8 pixel smiley used as the menu icon
-    const smiley = ["00111100", "01000010", "10100101", "10000001", "10100101", "10011001", "01000010", "00111100"];
-    const AboutIcon = h => props => h("svg", { viewBox: "0 0 8 8", width: props?.width ?? 24, height: props?.height ?? 24, className: props?.className, shapeRendering: "crispEdges", fill: "currentColor" },
-        smiley.flatMap((row, y) => [...row].map((v, x) => v === "1" ? h("rect", { key: x + "-" + y, x, y, width: 1, height: 1 }) : null)));
+    // menu icon: the pixel avatar itself
+    const AboutIcon = h => props => h("img", { src: ICON, alt: "", width: props?.width ?? 24, height: props?.height ?? 24,
+        style: { imageRendering: "pixelated", border: "2px solid currentColor", boxSizing: "border-box", background: "#000" } });
 
     window.__fcAbout = h => {
-        const btn = (cls, label, user, onClick) => h("button", { type: "button", className: "fc-btn " + cls, onClick },
-            h("span", { className: "fc-dot" }), h("span", { className: "fc-btn-label" }, label), h("span", { className: "fc-btn-user" }, user));
+        const btn = (cls, app, label, user, onClick) => h("button", { type: "button", className: "fc-btn " + cls, onClick },
+            h("img", { className: "fc-app", src: APP_ICONS[app], alt: "" }), h("span", { className: "fc-btn-label" }, label), h("span", { className: "fc-btn-user" }, user));
         return h("div", { className: "fc-wrap" },
             h("div", { className: "fc-card" },
                 h("div", { className: "fc-scan" }),
@@ -106,9 +101,9 @@
                         h("div", { className: "fc-sub" }, "> ", contact.description, h("span", { className: "fc-cursor" }, "_")))),
                 h("div", { className: "fc-rule" }),
                 h("div", { className: "fc-contact" },
-                    btn("fc-tiktok", "TikTok", contact.tiktok, () => native?.openUrl?.("https://www.tiktok.com/@" + contact.tiktok)),
-                    btn("fc-instagram", "Instagram", contact.instagram, () => native?.openUrl?.("https://www.instagram.com/" + contact.instagram + "/")),
-                    btn("fc-discord", "Discord", contact.discord, () => window.__fcAddFriend())),
+                    btn("fc-tiktok", "tiktok", "TikTok", contact.tiktok, () => native?.openUrl?.("https://www.tiktok.com/@" + contact.tiktok)),
+                    btn("fc-instagram", "instagram", "Instagram", contact.instagram, () => native?.openUrl?.("https://www.instagram.com/" + contact.instagram + "/")),
+                    btn("fc-discord", "discord", "Discord", contact.discord, () => window.__fcCopyDiscord())),
                 h("div", { className: "fc-foot" }, "FyoCord  \u00B7  made with pixels")));
     };
 
@@ -136,10 +131,7 @@
                     font:700 14px ui-monospace,Menlo,Consolas,"DejaVu Sans Mono",monospace;text-transform:uppercase;letter-spacing:1px;cursor:pointer;
                     box-shadow:5px 5px 0 #444;transition:none}
             .fc-btn:active{background:#fff;color:#000;transform:translate(3px,3px);box-shadow:2px 2px 0 #444}
-            .fc-dot{width:14px;height:14px;flex:none;background:#fff}
-            .fc-tiktok .fc-dot{background:#25f4ee;box-shadow:3px 0 0 #fe2c55}
-            .fc-instagram .fc-dot{background:#dd2a7b;box-shadow:3px 0 0 #f58529}
-            .fc-discord .fc-dot{background:#5865f2}
+            .fc-app{width:32px;height:32px;flex:none;image-rendering:pixelated}
             .fc-btn-label{flex:1;text-align:start}
             .fc-btn-user{opacity:.75;font-weight:400;text-transform:none}
             .fc-foot{position:relative;margin-top:20px;font-size:11px;opacity:.5;text-align:center;letter-spacing:2px;text-transform:uppercase}
