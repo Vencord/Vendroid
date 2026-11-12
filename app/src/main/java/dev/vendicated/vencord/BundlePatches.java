@@ -33,6 +33,10 @@ public final class BundlePatches {
             "([\\w$]+)\\(([\\w$]+),\\{title:\"Support the Project\",description:\"[^\"]*\",cardImage:([\\w$]+),backgroundImage:([\\w$]+),"
                     + "backgroundColor:\"[^\"]*\"\\},[\\w$]+\\([\\w$]+,null\\)\\)");
 
+    /** The "View Source Code" quick action: r(Row,{Icon:x,text:"View Source Code",action:()=>...openExternal("https://github.com/"+y)}) */
+    private static final Pattern SOURCE_ROW = Pattern.compile(
+            "[\\w$]+\\([\\w$]+,\\{Icon:[\\w$]+,text:\"View Source Code\",action:\\(\\)=>[^}]*\\}\\)");
+
     public static String apply(String js) {
         int renamed = 0;
         for (var r : RENAMES) {
@@ -49,12 +53,16 @@ public final class BundlePatches {
         var card = DONATE_CARD.matcher(js);
         boolean cardPatched = card.find();
         if (cardPatched) {
-            js = card.replaceFirst("$1($2,{title:window.__fcContact.name,description:window.__fcContact.description,"
-                    + "cardImage:$3,backgroundImage:$4,backgroundColor:\"#b9a6e8\"},window.__fcContactButtons($1))");
+            js = card.replaceFirst("(window.__fcCard?window.__fcCard($1):null)");
         }
 
+        var source = SOURCE_ROW.matcher(js);
+        boolean sourceRemoved = source.find();
+        if (sourceRemoved) js = source.replaceFirst("!1");
+
         Logger.i("Bundle patches: " + renamed + "/" + RENAMES.length + " renames, version line " + (versionPatched ? "OK" : "not found")
-                + ", contact card " + (cardPatched ? "OK" : "NOT FOUND (Vencord changed?)"));
+                + ", contact card " + (cardPatched ? "OK" : "NOT FOUND (Vencord changed?)")
+                + ", source row " + (sourceRemoved ? "removed" : "not found"));
         return js;
     }
 }

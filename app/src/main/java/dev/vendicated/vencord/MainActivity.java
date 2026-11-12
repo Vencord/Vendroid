@@ -115,6 +115,13 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        CrashReporter.install(this);
+        var crash = CrashReporter.pending(this);
+        if (crash != null) {
+            showCrashScreen(crash);
+            return;
+        }
+
         // https://developer.chrome.com/docs/devtools/remote-debugging/webviews/
         WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
 
@@ -151,6 +158,54 @@ public class MainActivity extends Activity {
         }
 
         askSetupOnce();
+    }
+
+    /** Shown instead of the app when the previous run crashed, so the cause can be copied / sent instead of lost. */
+    private void showCrashScreen(String trace) {
+        float d = getResources().getDisplayMetrics().density;
+        int pad = (int) (16 * d);
+        var column = new android.widget.LinearLayout(this);
+        column.setOrientation(android.widget.LinearLayout.VERTICAL);
+        column.setBackgroundColor(Color.parseColor("#0D0B1A"));
+        column.setPadding(pad, pad * 2, pad, pad);
+
+        var title = new TextView(this);
+        title.setText("FyoCord crashed last time");
+        title.setTextColor(Color.parseColor("#FF5C7A"));
+        title.setTextSize(20);
+        column.addView(title);
+
+        var scroll = new android.widget.ScrollView(this);
+        var body = new TextView(this);
+        body.setText(trace);
+        body.setTextColor(Color.parseColor("#D8D3F5"));
+        body.setTextSize(11);
+        body.setTypeface(android.graphics.Typeface.MONOSPACE);
+        body.setTextIsSelectable(true);
+        body.setPadding(0, pad, 0, pad);
+        scroll.addView(body);
+        column.addView(scroll, new android.widget.LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
+
+        var row = new android.widget.LinearLayout(this);
+        var copy = new Button(this);
+        copy.setText("Copy");
+        copy.setOnClickListener(v -> copyToClipboard(trace));
+        var share = new Button(this);
+        share.setText("Share");
+        share.setOnClickListener(v -> startActivity(Intent.createChooser(
+                new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, trace), "FyoCord crash")));
+        var retry = new Button(this);
+        retry.setText("Try again");
+        retry.setOnClickListener(v -> {
+            CrashReporter.clear(this);
+            recreate();
+        });
+        var lp = new android.widget.LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        row.addView(copy, lp);
+        row.addView(share, lp);
+        row.addView(retry, lp);
+        column.addView(row);
+        setContentView(column);
     }
 
     // ------------------------------------------------------------------ WebView / session
@@ -1022,6 +1077,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onStop() {
         super.onStop();
+        if (prefs == null) return;
         // keep Discord's timers and sockets running while the app is minimised, if the user asked for background mode
         var wv = Session.webView;
         if (wv != null && prefs.getBoolean(PREF_BACKGROUND, true)) wv.resumeTimers();
@@ -1029,6 +1085,10 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        if (prefs == null) { // crash screen only
+            super.onDestroy();
+            return;
+        }
         destroyed = true;
         handler.removeCallbacksAndMessages(null);
         DebugLog.setListener(null);

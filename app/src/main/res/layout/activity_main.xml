@@ -80,15 +80,16 @@
     <!-- Floating button: draggable, always on top, so a problem can be reported even before logging in -->
     <ImageView
         android:id="@+id/fab"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="54dp"
+        android:layout_height="54dp"
         android:layout_gravity="top|start"
-        android:alpha="0.85"
+        android:alpha="0.9"
         android:background="@drawable/bg_fab"
         android:contentDescription="@string/fab_description"
-        android:elevation="8dp"
-        android:padding="12dp"
-        android:src="@drawable/ic_fab" />
+        android:elevation="10dp"
+        android:padding="3dp"
+        android:scaleType="fitCenter"
+        android:src="@mipmap/ic_launcher_round" />
 
     <!-- Hub: messages log / report a problem / about + settings -->
     <FrameLayout

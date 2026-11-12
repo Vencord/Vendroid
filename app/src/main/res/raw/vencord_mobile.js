@@ -57,12 +57,23 @@
         }
     };
 
-    window.__fcContactButtons = h => {
+    const ICON = "data:image/png;base64,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";
+
+    // The whole card that replaces "Support the Project" (see BundlePatches.java). h = React.createElement.
+    window.__fcCard = h => {
         const btn = (cls, label, onClick) => h("button", { type: "button", className: "fc-btn " + cls, onClick }, label);
-        return h("div", { className: "fc-contact" },
-            btn("fc-tiktok", "TikTok  \u00B7  " + contact.tiktok, () => native?.openUrl?.("https://www.tiktok.com/@" + contact.tiktok)),
-            btn("fc-instagram", "Instagram  \u00B7  " + contact.instagram, () => native?.openUrl?.("https://www.instagram.com/" + contact.instagram + "/")),
-            btn("fc-discord", "Discord  \u00B7  " + contact.discord, () => window.__fcAddFriend())
+        return h("div", { className: "fc-card" },
+            h("div", { className: "fc-glow" }),
+            h("img", { className: "fc-icon", src: ICON, alt: "FyoCord" }),
+            h("div", { className: "fc-body" },
+                h("div", { className: "fc-name" }, contact.name),
+                h("div", { className: "fc-sub" }, contact.description),
+                h("div", { className: "fc-contact" },
+                    btn("fc-tiktok", "TikTok  \u00B7  " + contact.tiktok, () => native?.openUrl?.("https://www.tiktok.com/@" + contact.tiktok)),
+                    btn("fc-instagram", "Instagram  \u00B7  " + contact.instagram, () => native?.openUrl?.("https://www.instagram.com/" + contact.instagram + "/")),
+                    btn("fc-discord", "Discord  \u00B7  " + contact.discord, () => window.__fcAddFriend())
+                )
+            )
         );
     };
 
@@ -70,11 +81,25 @@
         const style = document.createElement("style");
         style.id = "fc-style";
         style.textContent = `
+            .fc-card{position:relative;overflow:hidden;display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+                     margin-bottom:20px;padding:20px;border-radius:18px;color:#fff;
+                     background:linear-gradient(135deg,#1b1244 0%,#3b1d78 55%,#8a2f8f 100%);
+                     border:1px solid rgba(255,255,255,.14);box-shadow:0 8px 28px rgba(60,20,120,.45)}
+            .fc-glow{position:absolute;inset:-40% -20% auto auto;width:260px;height:260px;border-radius:50%;pointer-events:none;
+                     background:radial-gradient(circle,rgba(255,77,157,.35),transparent 65%)}
+            .fc-icon{position:relative;width:84px;height:84px;border-radius:50%;flex:none;image-rendering:pixelated;
+                     border:3px solid transparent;
+                     background:linear-gradient(#000,#000) padding-box,linear-gradient(135deg,#9d7bff,#ff4d9d) border-box;
+                     box-shadow:0 0 0 4px rgba(255,255,255,.08),0 6px 18px rgba(0,0,0,.45)}
+            .fc-body{position:relative;flex:1;min-width:200px}
+            .fc-name{font-size:23px;font-weight:800;letter-spacing:.3px;
+                     background:linear-gradient(90deg,#fff,#d9c9ff 60%,#ffb3d6);-webkit-background-clip:text;background-clip:text;color:transparent}
+            .fc-sub{margin-top:3px;font-size:13px;opacity:.82}
             .fc-contact{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-            .fc-btn{border:0;border-radius:10px;padding:10px 14px;font-weight:600;font-size:14px;color:#fff;cursor:pointer;
-                    box-shadow:0 2px 8px rgba(0,0,0,.25);transition:transform .15s,filter .15s}
-            .fc-btn:active{transform:scale(.96);filter:brightness(1.1)}
-            .fc-tiktok{background:#111;box-shadow:0 0 0 1px #25f4ee,0 2px 8px rgba(0,0,0,.25)}
+            .fc-btn{border:0;border-radius:999px;padding:9px 15px;font-weight:700;font-size:13px;color:#fff;cursor:pointer;
+                    box-shadow:0 2px 10px rgba(0,0,0,.3);transition:transform .15s,filter .15s}
+            .fc-btn:active{transform:scale(.95);filter:brightness(1.15)}
+            .fc-tiktok{background:#0b0b0f;box-shadow:0 0 0 1px #25f4ee,0 0 12px rgba(37,244,238,.3)}
             .fc-instagram{background:linear-gradient(45deg,#f58529,#dd2a7b,#8134af)}
             .fc-discord{background:#5865f2}
         `;
