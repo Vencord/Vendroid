@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="background">#0D0B1A</color>
-    <color name="surface">#181430</color>
-    <color name="surface_high">#221C42</color>
-    <color name="stroke">#2E2760</color>
-    <color name="text_primary">#F2EFFF</color>
-    <color name="text_secondary">#A9A3C9</color>
-    <color name="accent">#7C5CFF</color>
-    <color name="accent_pink">#FF4D9D</color>
-    <color name="danger">#FF5C7A</color>
-    <color name="success">#3DDC97</color>
+    <color name="background">#050505</color>
+    <color name="surface">#101010</color>
+    <color name="surface_high">#1A1A1A</color>
+    <color name="stroke">#333333</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#A0A0A0</color>
+    <color name="accent">#FFFFFF</color>
+    <color name="accent_pink">#BDBDBD</color>
+    <color name="danger">#FF4D5E</color>
+    <color name="success">#6BE3A4</color>
 </resources>

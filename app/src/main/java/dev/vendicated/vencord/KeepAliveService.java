@@ -92,7 +92,9 @@ public class KeepAliveService extends Service {
 
         acquireLocks();
         Logger.i("Background mode: service running (wake lock " + (wakeLock != null && wakeLock.isHeld()) + ")");
-        return START_NOT_STICKY;
+        // after a reboot or when Android restarts us there is no screen: bring Discord up on our own
+        Session.startHeadless(this);
+        return START_STICKY;
     }
 
     private static PendingIntent pending(PendingIntent p) {

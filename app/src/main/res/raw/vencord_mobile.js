@@ -22,9 +22,9 @@
 
     const native = window.VencordMobileNative;
 
-    // ---- developer contact card (replaces the "Support the Project" card, see BundlePatches.java) ----
+    // ---- About Us (a page in the FyoCord settings, next to Plugins / Themes / ...) ----
     const contact = {
-        name: "\u{1D5D9}\u{1D5EC}\u{1D5E2}\u{1D5D7}\u{1D5E2}\u{1D5E5}\u30FB\u{1D7F0}\u{1D7ED}\u{1D7F0}",
+        name: "FYODOR",
         description: "\u0644\u0644\u062A\u0648\u0627\u0635\u0644 \u0648\u0627\u0644\u062F\u0639\u0645  \u00B7  Contact & support",
         tiktok: "V6LL9V",
         instagram: "V6IL9V",
@@ -59,53 +59,94 @@
 
     const ICON = "data:image/png;base64,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";
 
-    // The whole card that replaces "Support the Project" (see BundlePatches.java). h = React.createElement.
-    window.__fcCard = h => {
-        const btn = (cls, label, onClick) => h("button", { type: "button", className: "fc-btn " + cls, onClick }, label);
-        return h("div", { className: "fc-card" },
-            h("div", { className: "fc-glow" }),
-            h("img", { className: "fc-icon", src: ICON, alt: "FyoCord" }),
-            h("div", { className: "fc-body" },
-                h("div", { className: "fc-name" }, contact.name),
-                h("div", { className: "fc-sub" }, contact.description),
+    // 5x7 pixel font for the letters we need
+    const GLYPHS = {
+        F: ["11111", "10000", "10000", "11110", "10000", "10000", "10000"],
+        Y: ["10001", "10001", "01010", "00100", "00100", "00100", "00100"],
+        O: ["01110", "10001", "10001", "10001", "10001", "10001", "01110"],
+        D: ["11110", "10001", "10001", "10001", "10001", "10001", "11110"],
+        R: ["11110", "10001", "10001", "11110", "10100", "10010", "10001"],
+        C: ["01110", "10001", "10000", "10000", "10000", "10001", "01110"]
+    };
+
+    const pixelText = (h, word, cell) => {
+        const rects = [];
+        let i = 0;
+        for (const ch of word) {
+            const g = GLYPHS[ch];
+            if (g) {
+                g.forEach((row, y) => [...row].forEach((v, x) => {
+                    if (v !== "1") return;
+                    const px = (i * 6 + x) * cell, py = y * cell;
+                    rects.push(h("rect", { key: "s" + i + "-" + x + "-" + y, x: px + cell / 2, y: py + cell / 2, width: cell, height: cell, fill: "#555" }));
+                    rects.push(h("rect", { key: "w" + i + "-" + x + "-" + y, x: px, y: py, width: cell, height: cell, fill: "#fff" }));
+                }));
+            }
+            i++;
+        }
+        const w = (word.length * 6 - 1) * cell + cell, hgt = 7 * cell + cell;
+        return h("svg", { className: "fc-title", width: w, height: hgt, viewBox: "0 0 " + w + " " + hgt, shapeRendering: "crispEdges", "aria-label": word }, rects);
+    };
+
+    // 8x8 pixel smiley used as the menu icon
+    const smiley = ["00111100", "01000010", "10100101", "10000001", "10100101", "10011001", "01000010", "00111100"];
+    const AboutIcon = h => props => h("svg", { viewBox: "0 0 8 8", width: props?.width ?? 24, height: props?.height ?? 24, className: props?.className, shapeRendering: "crispEdges", fill: "currentColor" },
+        smiley.flatMap((row, y) => [...row].map((v, x) => v === "1" ? h("rect", { key: x + "-" + y, x, y, width: 1, height: 1 }) : null)));
+
+    window.__fcAbout = h => {
+        const btn = (cls, label, user, onClick) => h("button", { type: "button", className: "fc-btn " + cls, onClick },
+            h("span", { className: "fc-dot" }), h("span", { className: "fc-btn-label" }, label), h("span", { className: "fc-btn-user" }, user));
+        return h("div", { className: "fc-wrap" },
+            h("div", { className: "fc-card" },
+                h("div", { className: "fc-scan" }),
+                h("div", { className: "fc-head" },
+                    h("img", { className: "fc-icon", src: ICON, alt: "FYODOR" }),
+                    h("div", { className: "fc-body" },
+                        pixelText(h, "FYODOR", 5),
+                        h("div", { className: "fc-sub" }, "> ", contact.description, h("span", { className: "fc-cursor" }, "_")))),
+                h("div", { className: "fc-rule" }),
                 h("div", { className: "fc-contact" },
-                    btn("fc-tiktok", "TikTok  \u00B7  " + contact.tiktok, () => native?.openUrl?.("https://www.tiktok.com/@" + contact.tiktok)),
-                    btn("fc-instagram", "Instagram  \u00B7  " + contact.instagram, () => native?.openUrl?.("https://www.instagram.com/" + contact.instagram + "/")),
-                    btn("fc-discord", "Discord  \u00B7  " + contact.discord, () => window.__fcAddFriend())
-                )
-            )
-        );
+                    btn("fc-tiktok", "TikTok", contact.tiktok, () => native?.openUrl?.("https://www.tiktok.com/@" + contact.tiktok)),
+                    btn("fc-instagram", "Instagram", contact.instagram, () => native?.openUrl?.("https://www.instagram.com/" + contact.instagram + "/")),
+                    btn("fc-discord", "Discord", contact.discord, () => window.__fcAddFriend())),
+                h("div", { className: "fc-foot" }, "FyoCord  \u00B7  made with pixels")));
     };
 
     try {
         const style = document.createElement("style");
         style.id = "fc-style";
         style.textContent = `
-            .fc-card{position:relative;overflow:hidden;display:flex;align-items:center;gap:18px;flex-wrap:wrap;
-                     margin-bottom:20px;padding:20px;border-radius:18px;color:#fff;
-                     background:linear-gradient(135deg,#1b1244 0%,#3b1d78 55%,#8a2f8f 100%);
-                     border:1px solid rgba(255,255,255,.14);box-shadow:0 8px 28px rgba(60,20,120,.45)}
-            .fc-glow{position:absolute;inset:-40% -20% auto auto;width:260px;height:260px;border-radius:50%;pointer-events:none;
-                     background:radial-gradient(circle,rgba(255,77,157,.35),transparent 65%)}
-            .fc-icon{position:relative;width:84px;height:84px;border-radius:50%;flex:none;image-rendering:pixelated;
-                     border:3px solid transparent;
-                     background:linear-gradient(#000,#000) padding-box,linear-gradient(135deg,#9d7bff,#ff4d9d) border-box;
-                     box-shadow:0 0 0 4px rgba(255,255,255,.08),0 6px 18px rgba(0,0,0,.45)}
-            .fc-body{position:relative;flex:1;min-width:200px}
-            .fc-name{font-size:23px;font-weight:800;letter-spacing:.3px;
-                     background:linear-gradient(90deg,#fff,#d9c9ff 60%,#ffb3d6);-webkit-background-clip:text;background-clip:text;color:transparent}
-            .fc-sub{margin-top:3px;font-size:13px;opacity:.82}
-            .fc-contact{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-            .fc-btn{border:0;border-radius:999px;padding:9px 15px;font-weight:700;font-size:13px;color:#fff;cursor:pointer;
-                    box-shadow:0 2px 10px rgba(0,0,0,.3);transition:transform .15s,filter .15s}
-            .fc-btn:active{transform:scale(.95);filter:brightness(1.15)}
-            .fc-tiktok{background:#0b0b0f;box-shadow:0 0 0 1px #25f4ee,0 0 12px rgba(37,244,238,.3)}
-            .fc-instagram{background:linear-gradient(45deg,#f58529,#dd2a7b,#8134af)}
-            .fc-discord{background:#5865f2}
+            .fc-wrap{padding:8px 4px 24px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"DejaVu Sans Mono",monospace}
+            .fc-card{position:relative;overflow:hidden;padding:22px;color:#fff;background:#000;
+                     background-image:radial-gradient(rgba(255,255,255,.10) 1px,transparent 1.5px);background-size:12px 12px;
+                     box-shadow:0 0 0 3px #fff,0 0 0 6px #000,0 0 0 8px #555;margin:10px}
+            .fc-scan{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 2px,transparent 2px 4px)}
+            .fc-head{position:relative;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+            .fc-icon{width:104px;height:104px;flex:none;image-rendering:pixelated;border:4px solid #fff;background:#000;
+                     box-shadow:6px 6px 0 #444;animation:fc-bob 2.4s steps(4) infinite}
+            @keyframes fc-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+            .fc-body{flex:1;min-width:190px}
+            .fc-title{display:block;max-width:100%;height:auto}
+            .fc-sub{margin-top:12px;font-size:13px;opacity:.85;letter-spacing:.3px}
+            .fc-cursor{animation:fc-blink 1s steps(2) infinite}
+            @keyframes fc-blink{50%{opacity:0}}
+            .fc-rule{position:relative;margin:20px 0;height:4px;background:repeating-linear-gradient(90deg,#fff 0 8px,transparent 8px 16px)}
+            .fc-contact{position:relative;display:flex;flex-direction:column;gap:12px}
+            .fc-btn{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border:3px solid #fff;border-radius:0;background:#000;color:#fff;
+                    font:700 14px ui-monospace,Menlo,Consolas,"DejaVu Sans Mono",monospace;text-transform:uppercase;letter-spacing:1px;cursor:pointer;
+                    box-shadow:5px 5px 0 #444;transition:none}
+            .fc-btn:active{background:#fff;color:#000;transform:translate(3px,3px);box-shadow:2px 2px 0 #444}
+            .fc-dot{width:14px;height:14px;flex:none;background:#fff}
+            .fc-tiktok .fc-dot{background:#25f4ee;box-shadow:3px 0 0 #fe2c55}
+            .fc-instagram .fc-dot{background:#dd2a7b;box-shadow:3px 0 0 #f58529}
+            .fc-discord .fc-dot{background:#5865f2}
+            .fc-btn-label{flex:1;text-align:start}
+            .fc-btn-user{opacity:.75;font-weight:400;text-transform:none}
+            .fc-foot{position:relative;margin-top:20px;font-size:11px;opacity:.5;text-align:center;letter-spacing:2px;text-transform:uppercase}
         `;
         (document.head || document.documentElement).appendChild(style);
     } catch (e) {
-        log("W", "could not add contact card styles: " + e);
+        log("W", "could not add About Us styles: " + e);
     }
 
     if (typeof Vencord === "undefined" || !Vencord.Webpack) {
@@ -125,6 +166,25 @@
     } catch (e) {
         log("E", "vencord_mobile.js: Vencord.Webpack API changed? " + (e && e.stack ? e.stack : e));
     }
+
+    const registerAbout = () => {
+        try {
+            const h = Vencord.Webpack.Common.React.createElement;
+            const settings = Vencord.Plugins.plugins.Settings;
+            if (!settings?.customEntries) throw new Error("Settings plugin has no customEntries");
+            if (settings.customEntries.some(e => e.key === "fyocord_about")) return;
+            settings.customEntries.push({
+                key: "fyocord_about",
+                title: "About Us",
+                panelTitle: "About Us",
+                Component: () => window.__fcAbout(h),
+                Icon: AboutIcon(h)
+            });
+            log("I", "About Us page registered");
+        } catch (e) {
+            log("W", "could not add the About Us page: " + (e && e.message ? e.message : e));
+        }
+    };
 
     // ---- deleted / edited message logger ----
     // Remembers recent messages, and when one is deleted or edited reports the old text to the app, which stores it
@@ -273,6 +333,7 @@
             }
 
             startMessageLogger();
+            registerAbout();
 
             notifyNative("onVencordReady");
         }, e => log("E", "vencord_mobile.js: onceReady rejected: " + (e && e.stack ? e.stack : e)));

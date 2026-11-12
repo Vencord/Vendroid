@@ -53,7 +53,7 @@ public final class BundlePatches {
         var card = DONATE_CARD.matcher(js);
         boolean cardPatched = card.find();
         if (cardPatched) {
-            js = card.replaceFirst("(window.__fcCard?window.__fcCard($1):null)");
+            js = card.replaceFirst("null"); // the contact info lives in the About Us page
         }
 
         var source = SOURCE_ROW.matcher(js);

@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">FyoCord</string>
-    <string name="tagline">BY 𝗙𝗬𝗢𝗗𝗢𝗥・𝟰𝟭𝟰</string>
+    <string name="tagline">BY FYODOR</string>
     <string name="status_downloading">Downloading FyoCord… %1$d%%</string>
     <string name="status_loading_discord">Loading Discord… %1$d%%</string>
     <string name="status_starting_vencord">Starting FyoCord…</string>

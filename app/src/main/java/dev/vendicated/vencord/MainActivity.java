@@ -65,6 +65,7 @@ public class MainActivity extends Activity {
     private static final String PREF_CONTACT = "report_contact";
     private static final String PREF_CODE = "report_code";
     private static final String PREF_ASKED = "setup_asked";
+    public static final String PREF_EVER_READY = "ever_ready";
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private SharedPreferences prefs;
@@ -72,8 +73,8 @@ public class MainActivity extends Activity {
 
     // loading screen
     private View loadingOverlay;
-    private TextView logoText;
-    private ProgressBar progressBar;
+    private View logoText;
+    private PixelBarView progressBar;
     private TextView statusText;
     private Button retryButton;
     private boolean overlayVisible = true;
@@ -153,6 +154,10 @@ public class MainActivity extends Activity {
             // reattached to a session that kept running in the background
             Logger.i("Reattached to the running session (injected=" + Session.injected + ", ready=" + Session.ready + ")");
             syncOverlayWithSession();
+        } else if (Session.loading) {
+            // the background service is already loading it, just show the progress
+            showOverlay();
+            setStatus(R.string.status_downloading, 0);
         } else {
             startLoading();
         }
@@ -166,7 +171,7 @@ public class MainActivity extends Activity {
         int pad = (int) (16 * d);
         var column = new android.widget.LinearLayout(this);
         column.setOrientation(android.widget.LinearLayout.VERTICAL);
-        column.setBackgroundColor(Color.parseColor("#0D0B1A"));
+        column.setBackgroundColor(Color.parseColor("#050505"));
         column.setPadding(pad, pad * 2, pad, pad);
 
         var title = new TextView(this);
@@ -178,7 +183,7 @@ public class MainActivity extends Activity {
         var scroll = new android.widget.ScrollView(this);
         var body = new TextView(this);
         body.setText(trace);
-        body.setTextColor(Color.parseColor("#D8D3F5"));
+        body.setTextColor(Color.parseColor("#D0D0D0"));
         body.setTextSize(11);
         body.setTypeface(android.graphics.Typeface.MONOSPACE);
         body.setTextIsSelectable(true);
@@ -210,30 +215,16 @@ public class MainActivity extends Activity {
 
     // ------------------------------------------------------------------ WebView / session
 
-    @SuppressLint("SetJavaScriptEnabled")
     private void attachWebView() {
         var container = (FrameLayout) findViewById(R.id.web_container);
-        if (Session.webView == null) {
-            Session.webContext = new MutableContextWrapper(this);
-            var wv = new WebView(Session.webContext);
-            wv.setWebViewClient(new VWebviewClient());
-            wv.setWebChromeClient(new VChromeClient());
-            var s = wv.getSettings();
-            s.setJavaScriptEnabled(true);
-            s.setDomStorageEnabled(true);
-            s.setAllowFileAccess(true);
-            wv.addJavascriptInterface(new VencordNative(), "VencordMobileNative");
-            Session.webView = wv;
-            Session.resetPageState();
-            Session.initialized = false;
-        } else {
-            Session.webContext.setBaseContext(this);
-        }
+        Session.ensureWebView(this);
+        Session.webContext.setBaseContext(this);
 
         var wv = Session.webView;
         var parent = wv.getParent();
         if (parent instanceof ViewGroup) ((ViewGroup) parent).removeView(wv);
         container.addView(wv, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        fab.bringToFront(); // the page must never end up on top of the floating button
     }
 
     private void detachWebView() {
@@ -244,48 +235,36 @@ public class MainActivity extends Activity {
         if (Session.webContext != null && Session.appContext != null) Session.webContext.setBaseContext(Session.appContext);
     }
 
-    /**
-     * Downloads Vencord on a background thread (reporting progress to the loading screen), then loads Discord.
-     * Also used by the retry button.
-     */
+    /** Shows the loading screen and (re)starts the shared session loading. Also used by the retry button. */
     private void startLoading() {
         retryButton.setVisibility(View.GONE);
         setFabAlert(false);
         showOverlay();
         setStatus(R.string.status_downloading, 0);
-        Logger.i("Start loading (download FyoCord, then open Discord)");
-
-        var appContext = getApplicationContext();
-        new Thread(() -> {
-            try {
-                HttpClient.fetchVencord(appContext, percent -> runOnUiThread(() -> {
-                    if (!destroyed) setStatus(R.string.status_downloading, percent);
-                }));
-            } catch (IOException ex) {
-                Logger.e("Failed to fetch Vencord", ex);
-                runOnUiThread(() -> {
-                    showError(R.string.status_download_failed);
-                    setFabAlert(true);
-                });
-                return;
-            }
-
-            runOnUiThread(this::loadDiscord);
-        }, "vencord-download").start();
+        Logger.i("Start loading (get FyoCord, then open Discord)");
+        Session.startLoading(getApplicationContext());
     }
 
-    private void loadDiscord() {
-        var wv = Session.webView;
-        if (destroyed || wv == null) return;
+    // progress of the shared session loading (see Session)
 
-        Session.initialized = true;
-        Session.resetPageState();
-        setStatus(R.string.status_loading_discord, 0);
+    void onDownloadProgress(int percent) {
+        runOnUiThread(() -> {
+            if (!destroyed) setStatus(R.string.status_downloading, percent);
+        });
+    }
 
-        var url = Session.pendingUrl != null ? Session.pendingUrl.toString() : Constants.DISCORD_URL;
-        Session.pendingUrl = null;
-        Logger.i("Opening " + url + " in the WebView");
-        wv.loadUrl(url);
+    void onDiscordLoadStarted() {
+        runOnUiThread(() -> {
+            if (!destroyed) setStatus(R.string.status_loading_discord, 0);
+        });
+    }
+
+    void onLoadFailed() {
+        runOnUiThread(() -> {
+            if (destroyed) return;
+            showError(R.string.status_download_failed);
+            setFabAlert(true);
+        });
     }
 
     private void syncOverlayWithSession() {
@@ -363,16 +342,7 @@ public class MainActivity extends Activity {
         retryButton = findViewById(R.id.retry_button);
         retryButton.setOnClickListener(v -> startLoading());
 
-        // gradient lettering for the name
-        logoText.post(() -> {
-            var paint = logoText.getPaint();
-            float w = paint.measureText(logoText.getText().toString());
-            paint.setShader(new LinearGradient(0, 0, w, 0,
-                    new int[]{Color.parseColor("#9D7BFF"), Color.parseColor("#FF4D9D")}, null, Shader.TileMode.CLAMP));
-            logoText.invalidate();
-        });
-
-        pulseAnimator = ObjectAnimator.ofFloat(logoText, "alpha", 1f, 0.55f);
+        pulseAnimator = ObjectAnimator.ofFloat(findViewById(R.id.logo_image), "alpha", 1f, 0.7f);
         pulseAnimator.setDuration(1100);
         pulseAnimator.setRepeatMode(ObjectAnimator.REVERSE);
         pulseAnimator.setRepeatCount(ObjectAnimator.INFINITE);
@@ -569,9 +539,9 @@ public class MainActivity extends Activity {
         pageMessages.setVisibility("messages".equals(tab) ? View.VISIBLE : View.GONE);
         pageReport.setVisibility("report".equals(tab) ? View.VISIBLE : View.GONE);
         pageAbout.setVisibility("about".equals(tab) ? View.VISIBLE : View.GONE);
-        tabMessages.setBackgroundResource("messages".equals(tab) ? R.drawable.bg_tab_selected : R.drawable.bg_tab);
-        tabReport.setBackgroundResource("report".equals(tab) ? R.drawable.bg_tab_selected : R.drawable.bg_tab);
-        tabAbout.setBackgroundResource("about".equals(tab) ? R.drawable.bg_tab_selected : R.drawable.bg_tab);
+        styleSelectable(tabMessages, "messages".equals(tab), R.drawable.bg_tab_selected, R.drawable.bg_tab);
+        styleSelectable(tabReport, "report".equals(tab), R.drawable.bg_tab_selected, R.drawable.bg_tab);
+        styleSelectable(tabAbout, "about".equals(tab), R.drawable.bg_tab_selected, R.drawable.bg_tab);
         if ("messages".equals(tab)) refreshMessages();
         if ("about".equals(tab)) updateSettingsButtons();
     }
@@ -613,9 +583,15 @@ public class MainActivity extends Activity {
     }
 
     private void styleChips() {
-        chipAll.setBackgroundResource(filter == null ? R.drawable.bg_chip_selected : R.drawable.bg_chip);
-        chipDeleted.setBackgroundResource(MessageLog.TYPE_DELETE.equals(filter) ? R.drawable.bg_chip_selected : R.drawable.bg_chip);
-        chipEdited.setBackgroundResource(MessageLog.TYPE_EDIT.equals(filter) ? R.drawable.bg_chip_selected : R.drawable.bg_chip);
+        styleSelectable(chipAll, filter == null, R.drawable.bg_chip_selected, R.drawable.bg_chip);
+        styleSelectable(chipDeleted, MessageLog.TYPE_DELETE.equals(filter), R.drawable.bg_chip_selected, R.drawable.bg_chip);
+        styleSelectable(chipEdited, MessageLog.TYPE_EDIT.equals(filter), R.drawable.bg_chip_selected, R.drawable.bg_chip);
+    }
+
+    /** White block with black text when selected, outlined with white text otherwise (the pixel look). */
+    private void styleSelectable(TextView v, boolean selected, int selectedBg, int normalBg) {
+        v.setBackgroundResource(selected ? selectedBg : normalBg);
+        v.setTextColor(selected ? Color.BLACK : Color.WHITE);
     }
 
     private void refreshMessages() {
@@ -666,7 +642,7 @@ public class MainActivity extends Activity {
 
             var who = new TextView(MainActivity.this);
             who.setTextSize(14);
-            who.setTextColor(Color.parseColor("#F2EFFF"));
+            who.setTextColor(Color.parseColor("#FFFFFF"));
             who.setTypeface(who.getTypeface(), android.graphics.Typeface.BOLD);
             var place = new StringBuilder(e.author.isEmpty() ? "?" : e.author);
             if (!e.channel.isEmpty()) place.append("  ›  ").append(e.guild.isEmpty() ? "" : e.guild + " / ").append(e.channel);
@@ -676,7 +652,7 @@ public class MainActivity extends Activity {
 
             var body = new TextView(MainActivity.this);
             body.setTextSize(14);
-            body.setTextColor(Color.parseColor("#D8D3F5"));
+            body.setTextColor(Color.parseColor("#D0D0D0"));
             body.setTextIsSelectable(false);
             var sb = new StringBuilder();
             if (edit) {
@@ -1100,8 +1076,12 @@ public class MainActivity extends Activity {
         detachWebView();
         if (prefs.getBoolean(PREF_BACKGROUND, true)) {
             // the session (WebView, Discord connection, Vencord) lives on in Session, kept alive by the service
+            KeepAliveService.start(this);
             var wv = Session.webView;
-            if (wv != null) wv.resumeTimers();
+            if (wv != null) {
+                wv.onResume();
+                wv.resumeTimers();
+            }
         } else {
             if (Session.filePathCallback != null) {
                 Session.filePathCallback.onReceiveValue(null);

@@ -20,7 +20,7 @@ import java.util.UUID;
  * code with an expiry date. The developer hands those codes out; the app only checks the shape and expiry locally.
  */
 public final class Support {
-    public static final String DEV_NAME = "𝗙𝗬𝗢𝗗𝗢𝗥・𝟰𝟭𝟰";
+    public static final String DEV_NAME = "FYODOR";
     public static final String TIKTOK_USER = "V6LL9V";
     public static final String INSTAGRAM_USER = "V6IL9V";
     public static final String DISCORD_USER = "V6LL9V";
