@@ -1231,7 +1231,7 @@ public class MainActivity extends Activity {
         super.onStop();
         if (prefs == null) return;
         // off screen: the activity's window is hidden, so hand the page to the invisible window to keep it running
-        if (appStarted && prefs.getBoolean(PREF_BACKGROUND, true) && OverlayHost.canUse(this) && Session.webView != null) {
+        if (appStarted && prefs.getBoolean(PREF_BACKGROUND, true) && Session.webView != null) {
             OverlayHost.attach(this, Session.webView);
         }
         // keep Discord's timers and sockets running while the app is minimised, if the user asked for background mode

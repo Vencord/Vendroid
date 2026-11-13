@@ -78,8 +78,7 @@ public final class Session {
             MessageLog.init(appContext);
             // no screen: give the page an invisible window so it really loads and keeps running
             if (webView.getParent() == null) {
-                if (OverlayHost.canUse(appContext)) OverlayHost.attach(appContext, webView);
-                else Logger.w("No 'display over other apps' permission: the background session may stall until the app is opened");
+                OverlayHost.attach(appContext, webView);
             }
             if (!initialized && !loading) {
                 Logger.i("Headless start: loading the session without a screen");

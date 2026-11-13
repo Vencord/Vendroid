@@ -28,8 +28,12 @@ final class OverlayHost {
 
     /** Main thread only. Moves the WebView into the invisible window (adding the window if needed). */
     static void attach(Context context, WebView wv) {
-        if (wv == null || !canUse(context)) return;
+        if (wv == null) return;
         var app = context.getApplicationContext();
+        if (!canUse(app)) {
+            attachVirtual(app, wv);
+            return;
+        }
         try {
             if (holder == null) holder = new FrameLayout(app);
             var parent = wv.getParent();
@@ -58,8 +62,53 @@ final class OverlayHost {
         }
     }
 
+    // ---- fallback without the "display over other apps" permission: a window on a private virtual display ----
+    private static android.hardware.display.VirtualDisplay vdisplay;
+    private static android.app.Presentation presentation;
+    private static FrameLayout vholder;
+
+    private static void attachVirtual(Context app, WebView wv) {
+        try {
+            if (vholder == null) vholder = new FrameLayout(app);
+            var parent = wv.getParent();
+            if (parent == vholder) return;
+            if (parent instanceof ViewGroup) ((ViewGroup) parent).removeView(wv);
+            vholder.addView(wv, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            if (presentation == null) {
+                var dm = (android.hardware.display.DisplayManager) app.getSystemService(Context.DISPLAY_SERVICE);
+                var m = app.getResources().getDisplayMetrics();
+                vdisplay = dm.createVirtualDisplay("fyocord-bg", Math.max(320, m.widthPixels), Math.max(480, m.heightPixels), m.densityDpi,
+                        null, android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION);
+                presentation = new android.app.Presentation(app, vdisplay.getDisplay());
+                presentation.setContentView(vholder);
+                presentation.getWindow().setType(WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION);
+                presentation.show();
+                Logger.i("Background window attached via a virtual display (no overlay permission needed)");
+            }
+        } catch (Throwable t) {
+            Logger.w("Virtual-display background window failed: " + t);
+            removeVirtual();
+        }
+    }
+
+    private static void removeVirtual() {
+        try {
+            if (vholder != null) vholder.removeAllViews();
+            if (presentation != null) presentation.dismiss();
+        } catch (Throwable ignored) {
+        }
+        try {
+            if (vdisplay != null) vdisplay.release();
+        } catch (Throwable ignored) {
+        }
+        presentation = null;
+        vdisplay = null;
+        vholder = null;
+    }
+
     /** Removes the window (and the WebView stays wherever it currently is). */
     static void remove(Context context) {
+        removeVirtual();
         if (!added || holder == null) return;
         try {
             var wm = (WindowManager) context.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
