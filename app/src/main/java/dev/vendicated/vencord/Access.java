@@ -80,7 +80,7 @@ final class Access {
     }
 
     static boolean dueForRecheck(Context c) {
-        return System.currentTimeMillis() - prefs(c).getLong(P_CHECKED, 0) > 30 * 60_000L;
+        return System.currentTimeMillis() - prefs(c).getLong(P_CHECKED, 0) > 2 * 60_000L;
     }
 
     /** Checks the code with the relay and stores it. Blocking: call from a background thread. */

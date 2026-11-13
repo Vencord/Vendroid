@@ -117,10 +117,23 @@ public class MainActivity extends Activity {
         }
     };
     private boolean sending = false;
+    private boolean autoHealed = false;
 
     private final Runnable readyTimeout = () -> {
         if (Session.injected || destroyed) return;
         Logger.e("FyoCord did not report in " + (Constants.READY_TIMEOUT_MS / 1000) + "s after the page finished loading (onVencordInjected never called).");
+        if (!autoHealed) {
+            // same as the Update button: forget the cached copy, reload everything once on our own
+            autoHealed = true;
+            Logger.w("Auto-repair: downloading FyoCord again and reloading");
+            HttpClient.invalidate(getApplicationContext());
+            var wv = Session.webView;
+            if (wv != null) wv.stopLoading();
+            Session.initialized = false;
+            Session.resetPageState();
+            startLoading();
+            return;
+        }
         Toast.makeText(this, R.string.vencord_failed_toast, Toast.LENGTH_LONG).show();
         setFabAlert(true);
         hideOverlay();
@@ -194,6 +207,11 @@ public class MainActivity extends Activity {
         }
 
         askSetupOnce();
+
+        // a start that never gets going (stalled page) repairs itself once, like pressing Update
+        handler.postDelayed(() -> {
+            if (!destroyed && appStarted && !autoHealed && !Session.injected && !Session.ready && !Session.loading) readyTimeout.run();
+        }, 45_000);
 
         handler.removeCallbacks(accessWatch);
         handler.postDelayed(accessWatch, 60_000);
@@ -1180,7 +1198,17 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         foreground = true;
-        if (prefs != null && appStarted && !Access.isValid(this)) onAccessLost();
+        if (prefs != null && appStarted) {
+            if (!Access.isValid(this)) {
+                onAccessLost();
+            } else if (Access.dueForRecheck(this)) {
+                // switched off / deleted / device limit changed on the dashboard
+                var app = getApplicationContext();
+                new Thread(() -> {
+                    if (!Access.recheck(app)) runOnUiThread(this::onAccessLost);
+                }, "access-recheck").start();
+            }
+        }
     }
 
     @Override

@@ -18,7 +18,8 @@ import org.json.JSONObject;
 final class MessageNotifier {
     private MessageNotifier() {}
 
-    private static final String CHANNEL_ID = "fyocord_messages";
+    private static final String CHANNEL_ID = "fyocord_messages2"; // v2: channel sound settings can't be changed after creation
+    private static int counter = 0;
 
     static void show(Context context, String json) {
         try {
@@ -36,6 +37,10 @@ final class MessageNotifier {
             if (Build.VERSION.SDK_INT >= 26 && nm.getNotificationChannel(CHANNEL_ID) == null) {
                 var ch = new NotificationChannel(CHANNEL_ID, context.getString(R.string.notif_channel), NotificationManager.IMPORTANCE_HIGH);
                 ch.setShowBadge(true);
+                ch.enableVibration(true);
+                ch.setSound(android.provider.Settings.System.DEFAULT_NOTIFICATION_URI, new android.media.AudioAttributes.Builder()
+                        .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION)
+                        .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION).build());
                 nm.createNotificationChannel(ch);
             }
 
@@ -43,8 +48,9 @@ final class MessageNotifier {
                     .setClass(context, MainActivity.class)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             int flags = PendingIntent.FLAG_UPDATE_CURRENT | (Build.VERSION.SDK_INT >= 23 ? PendingIntent.FLAG_IMMUTABLE : 0);
-            int id = 1000 + (channelKey.hashCode() & 0x3FFFFFFF) % 100000;
-            var pending = PendingIntent.getActivity(context, id, tap, flags);
+            // one notification per message (not per channel), so each message makes its own sound
+            int id = 1000 + ((o.optString("mid", "").hashCode() ^ (++counter * 31)) & 0x3FFFFFFF) % 1_000_000;
+            var pending = PendingIntent.getActivity(context, channelKey.hashCode() & 0xFFFFF, tap, flags);
 
             var title = cut(o.optString("title", "Discord"), 80);
             var body = cut(o.optString("body", ""), 400);
@@ -57,7 +63,11 @@ final class MessageNotifier {
                     .setContentIntent(pending)
                     .setAutoCancel(true)
                     .setCategory(Notification.CATEGORY_MESSAGE)
+                    .setGroup("fc_" + channelKey)
+
                     .setWhen(System.currentTimeMillis());
+            if (Build.VERSION.SDK_INT >= 23) b.setLargeIcon(android.graphics.drawable.Icon.createWithResource(context, R.mipmap.ic_launcher));
+            else b.setLargeIcon(android.graphics.BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher_foreground));
             if (Build.VERSION.SDK_INT < 26) b.setPriority(Notification.PRIORITY_HIGH).setDefaults(Notification.DEFAULT_ALL);
             nm.notify(id, b.build());
         } catch (Exception ex) {

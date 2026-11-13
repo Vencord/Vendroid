@@ -40,7 +40,7 @@ public class KeepAliveService extends Service {
                     if (!Access.recheck(app)) watchdog.post(KeepAliveService.this::lockdown);
                 }, "access-recheck").start();
             }
-            watchdog.postDelayed(this, 5 * 60_000L);
+            watchdog.postDelayed(this, 2 * 60_000L);
         }
     };
 

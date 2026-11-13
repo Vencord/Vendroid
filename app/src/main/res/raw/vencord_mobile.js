@@ -310,6 +310,7 @@
                     const where = isDM ? "" : "  (#" + (ch.name || "") + (GuildStore?.getGuild?.(ch.guild_id)?.name ? " \u00B7 " + GuildStore.getGuild(ch.guild_id).name : "") + ")";
                     native.notify(JSON.stringify({
                         id: chId,
+                        mid: m.id,
                         title: who + where,
                         body: plainText(m).slice(0, 400),
                         url: "https://discord.com/channels/" + (ch.guild_id || "@me") + "/" + chId
