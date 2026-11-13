@@ -91,6 +91,13 @@ public class VencordNative {
         });
     }
 
+    /** A message that should notify the user (JSON: id, title, body, url), see vencord_mobile.js. */
+    @JavascriptInterface
+    public void notify(String json) {
+        var ctx = Session.appContext;
+        if (ctx != null && json != null && json.length() < 20_000) MessageNotifier.show(ctx, json);
+    }
+
     @JavascriptInterface
     public void toast(String message) {
         ui.post(() -> {

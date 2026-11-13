@@ -56,6 +56,9 @@ public class MainActivity extends Activity {
     public static final int FILECHOOSER_RESULTCODE = 8485;
     private static final int NOTIFICATION_PERMISSION_CODE = 8487;
 
+    /** True while the app is on screen (resumed); message notifications are only shown otherwise. */
+    static volatile boolean foreground = false;
+
     public static final String PREFS = "fyocord";
     public static final String PREF_BACKGROUND = "background_mode";
     private static final String PREF_FAB_X = "fab_x";
@@ -283,6 +286,9 @@ public class MainActivity extends Activity {
                     case REVOKED:
                         showLockStatus(R.string.lock_err_revoked, true);
                         break;
+                    case DEVICES:
+                        showLockStatus(R.string.lock_err_devices, true);
+                        break;
                     case OFFLINE:
                         showLockStatus(R.string.lock_err_offline, true);
                         break;
@@ -373,6 +379,7 @@ public class MainActivity extends Activity {
 
         var wv = Session.webView;
         var parent = wv.getParent();
+        if (parent == container) return; // already ours (e.g. coming back from the overlay window)
         if (parent instanceof ViewGroup) ((ViewGroup) parent).removeView(wv);
         container.addView(wv, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         fab.bringToFront(); // the page must never end up on top of the floating button
@@ -938,6 +945,7 @@ public class MainActivity extends Activity {
             updateSettingsButtons();
         });
         findViewById(R.id.about_battery).setOnClickListener(v -> askBatteryExemption());
+        findViewById(R.id.about_overlay).setOnClickListener(v -> askOverlayPermission());
         findViewById(R.id.about_update).setOnClickListener(v -> {
             hideHub();
             HttpClient.invalidate(getApplicationContext());
@@ -992,6 +1000,7 @@ public class MainActivity extends Activity {
         if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, NOTIFICATION_PERMISSION_CODE);
         } else {
+            askOverlayPermission();
             askBatteryExemption();
         }
     }
@@ -1002,6 +1011,18 @@ public class MainActivity extends Activity {
         if (requestCode == NOTIFICATION_PERMISSION_CODE && prefs.getBoolean(PREF_BACKGROUND, true)) {
             KeepAliveService.start(this); // the notification can show now
             askBatteryExemption();
+        }
+    }
+
+    private void askOverlayPermission() {
+        if (OverlayHost.canUse(this)) {
+            Toast.makeText(this, "OK", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        try {
+            startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName())));
+        } catch (Exception ex) {
+            Logger.w("Could not open the overlay settings: " + ex.getMessage());
         }
     }
 
@@ -1158,13 +1179,33 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        foreground = true;
         if (prefs != null && appStarted && !Access.isValid(this)) onAccessLost();
+    }
+
+    @Override
+    protected void onPause() {
+        foreground = false;
+        super.onPause();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // back on screen: take the page back from the invisible background window
+        if (prefs != null && appStarted && Session.webView != null && Session.webView.getParent() != findViewById(R.id.web_container)) {
+            attachWebView();
+        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         if (prefs == null) return;
+        // off screen: the activity's window is hidden, so hand the page to the invisible window to keep it running
+        if (appStarted && prefs.getBoolean(PREF_BACKGROUND, true) && OverlayHost.canUse(this) && Session.webView != null) {
+            OverlayHost.attach(this, Session.webView);
+        }
         // keep Discord's timers and sockets running while the app is minimised, if the user asked for background mode
         var wv = Session.webView;
         if (wv != null && prefs.getBoolean(PREF_BACKGROUND, true)) wv.resumeTimers();
@@ -1190,6 +1231,7 @@ public class MainActivity extends Activity {
             KeepAliveService.start(this);
             var wv = Session.webView;
             if (wv != null) {
+                OverlayHost.attach(this, wv);
                 wv.onResume();
                 wv.resumeTimers();
             }

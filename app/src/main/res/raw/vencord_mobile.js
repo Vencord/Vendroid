@@ -267,8 +267,62 @@
                 }
             };
 
+            // ---- notifications: the WebView has no Notification API, so tell the app which messages deserve one ----
+            const seenForNotify = new Set();
+            const plainText = (m) => {
+                let t = typeof m.content === "string" ? m.content : "";
+                t = t.replace(/<@!?(\d+)>/g, (_, id) => "@" + (nameOf(UserStore?.getUser?.(id)) || "user"))
+                    .replace(/<#(\d+)>/g, (_, id) => "#" + (ChannelStore?.getChannel?.(id)?.name || "channel"))
+                    .replace(/<a?:(\w+):\d+>/g, ":$1:");
+                if (!t && Array.isArray(m.attachments) && m.attachments.length) t = "\uD83D\uDCCE " + (m.attachments[0].filename || "attachment");
+                if (!t && m.sticker_items?.length) t = "[sticker]";
+                if (!t && m.embeds?.length) t = "[embed]";
+                return t;
+            };
+            const maybeNotify = (m, channelId) => {
+                try {
+                    if (!native?.notify || !m?.id || seenForNotify.has(m.id)) return;
+                    const me = UserStore?.getCurrentUser?.();
+                    if (!me || m.author?.id === me.id) return;
+                    if (m.type !== undefined && m.type !== 0 && m.type !== 19) return;
+                    const chId = m.channel_id ?? channelId;
+                    const ch = ChannelStore?.getChannel?.(chId);
+                    if (!ch) return;
+                    const isDM = ch.type === 1 || ch.type === 3;
+                    const roles = (() => {
+                        try {
+                            return Vencord.Webpack.Common.GuildMemberStore?.getSelfMember?.(ch.guild_id)?.roles ?? [];
+                        } catch {
+                            return [];
+                        }
+                    })();
+                    const mentioned = (m.mentions ?? []).some(u => u.id === me.id)
+                        || m.mention_everyone
+                        || (m.mention_roles ?? []).some(r => roles.includes(r));
+                    if (!isDM && !mentioned) return;
+                    try {
+                        const S = Vencord.Webpack.findStore?.("UserGuildSettingsStore");
+                        if (S && (S.isChannelMuted?.(ch.guild_id, ch.id) || (ch.guild_id && S.isMuted?.(ch.guild_id)))) return;
+                    } catch {}
+                    seenForNotify.add(m.id);
+                    if (seenForNotify.size > 500) seenForNotify.delete(seenForNotify.values().next().value);
+                    const who = nameOf(m.author) || "Discord";
+                    const where = isDM ? "" : "  (#" + (ch.name || "") + (GuildStore?.getGuild?.(ch.guild_id)?.name ? " \u00B7 " + GuildStore.getGuild(ch.guild_id).name : "") + ")";
+                    native.notify(JSON.stringify({
+                        id: chId,
+                        title: who + where,
+                        body: plainText(m).slice(0, 400),
+                        url: "https://discord.com/channels/" + (ch.guild_id || "@me") + "/" + chId
+                    }));
+                } catch (err) {
+                    log("W", "notification error: " + (err && err.message ? err.message : err));
+                }
+            };
+
             FluxDispatcher.subscribe("MESSAGE_CREATE", safe(e => {
-                if (!e.optimistic && e.message) remember(e.message, e.channelId);
+                if (e.optimistic || !e.message) return;
+                remember(e.message, e.channelId);
+                maybeNotify(e.message, e.channelId);
             }));
             FluxDispatcher.subscribe("LOAD_MESSAGES_SUCCESS", safe(e => {
                 for (const m of e.messages ?? []) remember(m, e.channelId);

@@ -43,6 +43,7 @@
     <string name="about_bg_off">وضع الخلفية: متوقف</string>
     <string name="about_wake_on">إبقاء الجهاز مستيقظاً والشاشة مطفية: مفعّل</string>
     <string name="about_wake_off">إبقاء الجهاز مستيقظاً والشاشة مطفية: متوقف</string>
+    <string name="about_overlay">السماح بنافذة الخلفية (ضروري ليعمل فعلياً بالخلفية)</string>
     <string name="about_battery">السماح باستهلاك البطارية بدون قيود</string>
     <string name="about_update">تحديث FyoCord الآن</string>
     <string name="about_version">FyoCord %1$s</string>
@@ -62,7 +63,9 @@
     <string name="lock_err_invalid">الكود غير صحيح. تأكد أنك نسخته كاملاً.</string>
     <string name="lock_err_expired">انتهت صلاحية هذا الكود.</string>
     <string name="lock_err_revoked">تم إيقاف هذا الكود.</string>
+    <string name="lock_err_devices">هذا الكود مستخدم على أقصى عدد من الأجهزة.</string>
     <string name="lock_err_offline">لا يوجد إنترنت. الكود يُفحص عبر الإنترنت أول مرة.</string>
     <string name="lock_err_server">خادم الأكواد لا يستجيب، حاول لاحقاً.</string>
     <string name="lock_welcome">أهلاً %1$s</string>
+    <string name="notif_channel">الرسائل</string>
 </resources>

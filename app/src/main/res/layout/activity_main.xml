@@ -447,6 +447,17 @@
 
 
                         <Button android:fontFamily="monospace"
+                            android:id="@+id/about_overlay"
+                            android:layout_width="match_parent"
+                            android:layout_height="46dp"
+                            android:layout_marginTop="8dp"
+                            android:background="@drawable/bg_btn_secondary"
+                            android:text="@string/about_overlay"
+                            android:textAllCaps="false"
+                            android:textColor="@color/text_primary"
+                            android:textSize="14sp" />
+
+                        <Button android:fontFamily="monospace"
                             android:id="@+id/about_battery"
                             android:layout_width="match_parent"
                             android:layout_height="46dp"

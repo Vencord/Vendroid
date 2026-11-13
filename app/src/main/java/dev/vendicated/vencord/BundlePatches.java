@@ -25,6 +25,17 @@ public final class BundlePatches {
             {"infoLabel:\"Vencord\"", "infoLabel:\"FyoCord\""},
     };
 
+    /**
+     * Settings layout: the FyoCord section goes to the very top of Discord's settings, and our About Us page is its
+     * first entry, before FyoCord, Plugins, Themes and the rest.
+     */
+    private static final String[][] SETTINGS_ORDER = {
+            {"n=[o({key:\"vencord_main\",", "n=[...this.customEntries.filter(e=>e.key===\"fyocord_about\").map(o),o({key:\"vencord_main\","},
+            {"...this.customEntries.map(o),", "...this.customEntries.filter(e=>e.key!==\"fyocord_about\").map(o),"},
+            {"{label:\"At the very top\",value:\"top\"}", "{label:\"At the very top\",value:\"top\",default:!0}"},
+            {"{label:\"Above the Nitro section\",value:\"aboveNitro\",default:!0}", "{label:\"Above the Nitro section\",value:\"aboveNitro\"}"},
+    };
+
     /** The version line in the settings sidebar, `Vencord ${version}${suffix}`. */
     private static final Pattern VERSION_LINE = Pattern.compile("`Vencord (\\$\\{[^`}]*\\}(?:\\$\\{[^`}]*\\})*)`");
 
@@ -46,6 +57,14 @@ public final class BundlePatches {
             }
         }
 
+        int ordered = 0;
+        for (var r : SETTINGS_ORDER) {
+            if (js.contains(r[0])) {
+                js = js.replace(r[0], r[1]);
+                ordered++;
+            }
+        }
+
         var version = VERSION_LINE.matcher(js);
         boolean versionPatched = version.find();
         if (versionPatched) js = version.replaceFirst(Matcher.quoteReplacement("`FyoCord ") + "$1`");
@@ -62,7 +81,8 @@ public final class BundlePatches {
 
         Logger.i("Bundle patches: " + renamed + "/" + RENAMES.length + " renames, version line " + (versionPatched ? "OK" : "not found")
                 + ", contact card " + (cardPatched ? "OK" : "NOT FOUND (Vencord changed?)")
-                + ", source row " + (sourceRemoved ? "removed" : "not found"));
+                + ", source row " + (sourceRemoved ? "removed" : "not found")
+                + ", settings order " + ordered + "/" + SETTINGS_ORDER.length);
         return js;
     }
 }

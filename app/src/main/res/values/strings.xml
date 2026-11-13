@@ -45,6 +45,7 @@
     <string name="about_bg_off">Background mode: OFF</string>
     <string name="about_wake_on">Keep awake with screen off: ON</string>
     <string name="about_wake_off">Keep awake with screen off: OFF</string>
+    <string name="about_overlay">Allow background window (needed for real background work)</string>
     <string name="about_battery">Allow unrestricted battery use</string>
     <string name="about_update">Update FyoCord now</string>
     <string name="about_version">FyoCord %1$s</string>
@@ -64,7 +65,9 @@
     <string name="lock_err_invalid">This code isn\'t valid. Check that you copied all of it.</string>
     <string name="lock_err_expired">This code has expired.</string>
     <string name="lock_err_revoked">This code has been switched off.</string>
+    <string name="lock_err_devices">This code is already used on the maximum number of devices.</string>
     <string name="lock_err_offline">No internet. The code is checked online the first time.</string>
     <string name="lock_err_server">The code server is not answering, try again later.</string>
     <string name="lock_welcome">Welcome %1$s</string>
+    <string name="notif_channel">Messages</string>
 </resources>

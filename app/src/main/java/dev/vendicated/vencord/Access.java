@@ -21,7 +21,7 @@ import org.json.JSONObject;
 final class Access {
     private Access() {}
 
-    enum Problem {INVALID, EXPIRED, REVOKED, OFFLINE, SERVER}
+    enum Problem {INVALID, EXPIRED, REVOKED, DEVICES, OFFLINE, SERVER}
 
     static final class AccessException extends Exception {
         final Problem problem;
@@ -80,7 +80,7 @@ final class Access {
     }
 
     static boolean dueForRecheck(Context c) {
-        return System.currentTimeMillis() - prefs(c).getLong(P_CHECKED, 0) > 6 * 3600_000L;
+        return System.currentTimeMillis() - prefs(c).getLong(P_CHECKED, 0) > 30 * 60_000L;
     }
 
     /** Checks the code with the relay and stores it. Blocking: call from a background thread. */
@@ -92,7 +92,7 @@ final class Access {
             throw new AccessException(ex.expired ? Problem.EXPIRED : Problem.INVALID, ex.getMessage());
         }
 
-        var result = ask(code);
+        var result = ask(c, code);
         long exp = result.optLong("exp", code.expiresAt);
         prefs(c).edit()
                 .putString(P_CODE, code.raw)
@@ -112,8 +112,10 @@ final class Access {
         var code = code(c);
         if (code == null) return false;
         try {
-            ask(code);
-            prefs(c).edit().putLong(P_CHECKED, System.currentTimeMillis()).apply();
+            var result = ask(c, code);
+            // the developer may have changed the end time from the dashboard
+            prefs(c).edit().putLong(P_CHECKED, System.currentTimeMillis())
+                    .putLong(P_EXP, result.optLong("exp", prefs(c).getLong(P_EXP, 0))).apply();
             return true;
         } catch (AccessException ex) {
             if (ex.problem == Problem.OFFLINE || ex.problem == Problem.SERVER) return true;
@@ -123,7 +125,18 @@ final class Access {
         }
     }
 
-    private static JSONObject ask(Support.Code code) throws AccessException {
+    /** A random id for this install (not hardware-based), so the developer can limit devices per code. */
+    private static String deviceId(Context c) {
+        var p = prefs(c);
+        var id = p.getString("device_id", null);
+        if (id == null) {
+            id = java.util.UUID.randomUUID().toString();
+            p.edit().putString("device_id", id).apply();
+        }
+        return id;
+    }
+
+    private static JSONObject ask(Context c, Support.Code code) throws AccessException {
         HttpURLConnection conn = null;
         try {
             conn = (HttpURLConnection) new URL(code.endpoint + "/activate").openConnection();
@@ -132,7 +145,8 @@ final class Access {
             conn.setRequestMethod("POST");
             conn.setDoOutput(true);
             conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            byte[] body = ("code=" + URLEncoder.encode(code.raw, "UTF-8")).getBytes(StandardCharsets.UTF_8);
+            byte[] body = ("code=" + URLEncoder.encode(code.raw, "UTF-8") + "&device=" + URLEncoder.encode(deviceId(c), "UTF-8")
+                    + "&model=" + URLEncoder.encode(android.os.Build.MANUFACTURER + " " + android.os.Build.MODEL, "UTF-8")).getBytes(StandardCharsets.UTF_8);
             try (OutputStream os = conn.getOutputStream()) {
                 os.write(body);
             }
@@ -148,6 +162,8 @@ final class Access {
                     throw new AccessException(Problem.INVALID, "invalid");
                 case 410:
                     throw new AccessException(Problem.EXPIRED, "expired");
+                case 409:
+                    throw new AccessException(Problem.DEVICES, "device limit");
                 case 403:
                     throw new AccessException(Problem.REVOKED, "revoked");
                 default:
