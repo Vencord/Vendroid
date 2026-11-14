@@ -350,6 +350,13 @@
             }));
 
             log("I", "message logger started");
+            // heartbeat: gaps in these lines in the report log show when the page was frozen in the background
+            let beats = 0;
+            setInterval(() => {
+                try {
+                    log("I", "page heartbeat #" + (++beats) + " hidden=" + document.hidden + " vis=" + document.visibilityState);
+                } catch {}
+            }, 120000);
         } catch (e) {
             log("W", "message logger could not start: " + (e && e.stack ? e.stack : e));
         }

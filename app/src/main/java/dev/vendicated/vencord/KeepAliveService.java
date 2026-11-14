@@ -29,6 +29,9 @@ public class KeepAliveService extends Service {
     private final Runnable watch = new Runnable() {
         @Override
         public void run() {
+            Logger.i("BG status: activity=" + (Session.activity != null) + " foreground=" + MainActivity.foreground
+                    + " webview=" + (Session.webView != null) + " parent=" + (Session.webView != null && Session.webView.getParent() != null)
+                    + " injected=" + Session.injected + " ready=" + Session.ready + " overlayPerm=" + OverlayHost.canUse(KeepAliveService.this));
             // the access may have run out or been revoked while nobody was looking
             if (!Access.isValid(KeepAliveService.this)) {
                 lockdown();
