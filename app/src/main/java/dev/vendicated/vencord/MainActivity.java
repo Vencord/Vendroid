@@ -76,7 +76,7 @@ public class MainActivity extends Activity {
             Uri data = intent.getData();
             if (data != null) handleUrl(intent.getData());
         } else {
-            wv.loadUrl("https://discord.com/app");
+            wv.loadUrl("https://discord.com/channels/@me");
         }
 
         wvInitialized = true;
