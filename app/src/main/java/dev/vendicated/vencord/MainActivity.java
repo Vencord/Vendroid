@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -40,8 +41,10 @@ public class MainActivity extends Activity {
         wv = findViewById(R.id.webview);
 
         applyWindowInsets();
-
         explodeAndroid();
+
+        var isDarkMode = (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+        wv.setBackgroundColor(isDarkMode ? 0xff313338 : 0xffffffff);
 
         wv.setWebViewClient(new VWebviewClient());
         wv.setWebChromeClient(new VChromeClient(this));
@@ -49,13 +52,13 @@ public class MainActivity extends Activity {
         var s = wv.getSettings();
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
-        s.setAllowFileAccess(true);
+        s.setAllowFileAccess(false);
+        s.setMediaPlaybackRequiresUserGesture(false);
 
         defaultUserAgent = s.getUserAgentString();
         applyUserAgent();
 
         wv.addJavascriptInterface(new VendroidNative(this, wv), "VendroidNative");
-
         try {
             HttpClient.fetchVencord(this);
         } catch (IOException ex) {
