@@ -23,6 +23,9 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -35,6 +38,12 @@
                 <data android:host="*.discordapp.com" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".UpdaterActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:label="@string/open_updater"
+            android:theme="@style/LoadingTheme" />
     </application>
 
 </manifest>

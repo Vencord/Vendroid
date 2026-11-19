@@ -2,6 +2,7 @@
     <string name="app_name">Vendroid</string>
     <string name="vendroid_settings">Vendroid Settings</string>
     <string name="vencord_updater">Vencord Updater</string>
+    <string name="open_updater">Open Updater</string>
     <string name="use_desktop_ui">Use desktop UI</string>
     <string name="discord_branch">Discord branch</string>
     <string name="branch_stable">Stable</string>
