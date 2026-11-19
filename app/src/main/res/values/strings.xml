@@ -3,6 +3,12 @@
     <string name="vendroid_settings">Vendroid Settings</string>
     <string name="vencord_updater">Vencord Updater</string>
     <string name="use_desktop_ui">Use desktop UI</string>
+    <string name="discord_branch">Discord branch</string>
+    <string name="branch_stable">Stable</string>
+    <string name="branch_ptb">PTB</string>
+    <string name="branch_canary">Canary</string>
+    <string name="discord_branch_change_notice">Changing branches will automatically reload the app. You will have to log in again.</string>
+    <string name="switching_discord_branch">Switching Discord branch...</string>
     <string name="auto_updates">Auto updates</string>
     <string name="updates">Updates</string>
     <string name="downloading_vencord">Downloading Vencord…</string>

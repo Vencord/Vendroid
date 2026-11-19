@@ -18,6 +18,7 @@ import android.view.WindowInsets;
 import android.webkit.ValueCallback;
 import android.webkit.WebView;
 import android.widget.Button;
+import android.widget.RadioGroup;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -60,7 +61,7 @@ public class MainActivity extends Activity {
         defaultUserAgent = s.getUserAgentString();
         applyUserAgent();
 
-        wv.addJavascriptInterface(new VencordNative(this, wv), "VencordMobileNative");
+        wv.addJavascriptInterface(new VendroidNative(this, wv), "VendroidNative");
 
         try {
             HttpClient.fetchVencord(this);
@@ -76,7 +77,7 @@ public class MainActivity extends Activity {
             Uri data = intent.getData();
             if (data != null) handleUrl(intent.getData());
         } else {
-            wv.loadUrl("https://discord.com/channels/@me");
+            wv.loadUrl(DiscordBranch.getWebUrl(this) + "channels/@me");
         }
 
         wvInitialized = true;
@@ -170,7 +171,8 @@ public class MainActivity extends Activity {
 
     public void openVendroidSettings() {
         var view = getLayoutInflater().inflate(R.layout.dialog_vendroid_settings, null);
-        var desktopUiSwitch = (Switch) view.findViewById(R.id.desktop_ui_switch);
+
+        Switch desktopUiSwitch = view.findViewById(R.id.desktop_ui_switch);
         desktopUiSwitch.setChecked(VendroidSettings.isDesktopUiEnabled(this));
         desktopUiSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             VendroidSettings.setDesktopUiEnabled(this, isChecked);
@@ -178,11 +180,23 @@ public class MainActivity extends Activity {
             wv.reload();
         });
 
-        new AlertDialog.Builder(this)
+        RadioGroup branchRadio = view.findViewById(R.id.branch_group);
+        branchRadio.check(DiscordBranch.getRadioButtonId(this));
+
+        final var dialog = new AlertDialog.Builder(this)
                 .setTitle(R.string.vendroid_settings)
                 .setView(view)
                 .setPositiveButton(android.R.string.ok, null)
                 .show();
+
+        branchRadio.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == DiscordBranch.getRadioButtonId(this)) return;
+
+            DiscordBranch.setFromRadioButtonId(this, checkedId);
+            Toast.makeText(this, R.string.switching_discord_branch, Toast.LENGTH_SHORT).show();
+            wv.loadUrl(DiscordBranch.getWebUrl(this) + "channels/@me");
+            dialog.dismiss();
+        });
     }
 
     public void openUpdaterDialog() {
@@ -284,7 +298,7 @@ public class MainActivity extends Activity {
 
     public void handleUrl(Uri url) {
         if (url != null) {
-            if (!url.getAuthority().equals("discord.com")) return;
+            if (!Utils.isDiscordUrl(url)) return;
             if (!wvInitialized) {
                 wv.loadUrl(url.toString());
             } else {

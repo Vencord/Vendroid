@@ -2,23 +2,67 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:gravity="center_vertical"
+    android:orientation="vertical"
     android:paddingStart="24dp"
     android:paddingEnd="24dp"
     android:paddingTop="8dp"
     android:paddingBottom="8dp">
 
-    <TextView
-        android:layout_width="0dp"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="@string/use_desktop_ui"
-        android:textSize="16sp" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
 
-    <Switch
-        android:id="@+id/desktop_ui_switch"
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/use_desktop_ui"
+            android:textSize="16sp" />
+
+        <Switch
+            android:id="@+id/desktop_ui_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:showText="false" />
+    </LinearLayout>
+
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:showText="false" />
+        android:layout_marginTop="16dp"
+        android:text="@string/discord_branch"
+        android:textSize="16sp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="@string/discord_branch_change_notice" />
+
+    <RadioGroup
+        android:id="@+id/branch_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RadioButton
+            android:id="@+id/branch_stable"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/branch_stable" />
+
+        <RadioButton
+            android:id="@+id/branch_ptb"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/branch_ptb" />
+
+        <RadioButton
+            android:id="@+id/branch_canary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/branch_canary" />
+    </RadioGroup>
 </LinearLayout>

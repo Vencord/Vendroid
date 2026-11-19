@@ -3,11 +3,11 @@ package dev.vendicated.vencord;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
-public class VencordNative {
+public class VendroidNative {
     private final WebView wv;
     private final MainActivity activity;
 
-    public VencordNative(MainActivity activity, WebView wv) {
+    public VendroidNative(MainActivity activity, WebView wv) {
         this.activity = activity;
         this.wv = wv;
     }

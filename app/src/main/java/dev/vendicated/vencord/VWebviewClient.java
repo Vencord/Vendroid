@@ -16,7 +16,7 @@ public class VWebviewClient extends WebViewClient {
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
         var url = request.getUrl();
-        if ("discord.com".equals(url.getAuthority()) || "about:blank".equals(url.toString())) {
+        if (Utils.isDiscordUrl(url) || "about:blank".equals(url.toString())) {
             return false;
         }
 
@@ -40,8 +40,8 @@ public class VWebviewClient extends WebViewClient {
     @Nullable
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest req) {
-        var uri = req.getUrl();
-        if (req.isForMainFrame() || req.getUrl().getPath().endsWith(".css")) {
+        var path = req.getUrl().getPath();
+        if (req.isForMainFrame() || (path != null && path.endsWith(".css"))) {
             try {
                 return doFetch(req);
             } catch (IOException ex) {
@@ -71,6 +71,9 @@ public class VWebviewClient extends WebViewClient {
         }
         if (url.endsWith(".css")) modifiedHeaders.put("Content-Type", "text/css");
 
-        return new WebResourceResponse(modifiedHeaders.getOrDefault("Content-Type", "application/octet-stream"), "utf-8", code, msg, modifiedHeaders, conn.getInputStream());
+        var contentType = modifiedHeaders.get("Content-Type");
+        if (contentType == null) contentType = "application/octet-stream";
+
+        return new WebResourceResponse(contentType, "utf-8", code, msg, modifiedHeaders, conn.getInputStream());
     }
 }

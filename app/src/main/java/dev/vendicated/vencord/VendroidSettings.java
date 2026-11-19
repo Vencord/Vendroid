@@ -6,10 +6,15 @@ import android.content.SharedPreferences;
 import java.util.regex.Pattern;
 
 public class VendroidSettings {
+    public static final String BRANCH_STABLE = "stable";
+    public static final String BRANCH_PTB = "ptb";
+    public static final String BRANCH_CANARY = "canary";
+
     private static final String PREFS_NAME = "vendroid_settings";
     private static final String KEY_DESKTOP_UI = "desktop_ui";
     private static final String KEY_AUTO_UPDATES = "auto_updates";
     private static final String KEY_INSTALLED_HASH = "installed_hash";
+    private static final String KEY_BRANCH = "branch";
     private static final Pattern CHROME_VERSION = Pattern.compile("Chrome/[\\d.]+");
 
     private static SharedPreferences prefs(Context ctx) {
@@ -38,6 +43,14 @@ public class VendroidSettings {
 
     public static void setInstalledHash(Context ctx, String hash) {
         prefs(ctx).edit().putString(KEY_INSTALLED_HASH, hash).apply();
+    }
+
+    public static String getBranch(Context ctx) {
+        return prefs(ctx).getString(KEY_BRANCH, BRANCH_STABLE);
+    }
+
+    public static void setBranch(Context ctx, String branch) {
+        prefs(ctx).edit().putString(KEY_BRANCH, branch).apply();
     }
 
     public static String desktopUserAgent(String currentUserAgent) {
