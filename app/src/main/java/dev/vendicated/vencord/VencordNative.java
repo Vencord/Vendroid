@@ -27,4 +27,14 @@ public class VencordNative {
     public void openVendroidSettings() {
         activity.runOnUiThread(activity::openVendroidSettings);
     }
+
+    @JavascriptInterface
+    public void openVencordUpdater() {
+        activity.runOnUiThread(activity::openUpdaterDialog);
+    }
+
+    @JavascriptInterface
+    public String getVencordCss() {
+        return HttpClient.VencordCss == null ? "" : HttpClient.VencordCss;
+    }
 }

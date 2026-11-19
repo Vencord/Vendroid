@@ -7,7 +7,6 @@ import androidx.annotation.NonNull;
 
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Locale;
 
 public class HttpClient {
@@ -42,6 +41,7 @@ public class HttpClient {
 
     public static String VencordRuntime;
     public static String VencordMobileRuntime;
+    public static String VencordCss;
 
     public static void fetchVencord(Activity activity) throws IOException {
         if (VencordRuntime != null) return;
@@ -51,21 +51,17 @@ public class HttpClient {
             VencordMobileRuntime = readAsText(is);
         }
 
-        var conn = fetch(Constants.JS_BUNDLE_URL);
-        try (var is = conn.getInputStream()) {
-            VencordRuntime = readAsText(is);
+        var freshlyInstalled = VencordUpdater.ensureInstalled(activity);
+        if (!freshlyInstalled && VendroidSettings.isAutoUpdatesEnabled(activity)) {
+            VencordUpdater.autoUpdate(activity);
         }
+
+        VencordUpdater.loadBundles(activity);
     }
 
-    private static HttpURLConnection fetch(String url) throws IOException {
-        var conn = (HttpURLConnection) new URL(url).openConnection();
-        if (conn.getResponseCode() >= 300) {
-            throw new HttpException(conn);
-        }
-        return conn;
-    }
+    static String readAsText(InputStream is) throws IOException {
+        if (is == null) return "";
 
-    private static String readAsText(InputStream is) throws IOException {
         try (var baos = new ByteArrayOutputStream()) {
             int n;
             byte[] buf = new byte[16384]; // 16 KB

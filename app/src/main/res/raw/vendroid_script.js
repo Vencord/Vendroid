@@ -7,9 +7,18 @@
     function VendroidSettings() {
         const { React } = Common;
         return React.createElement(
-            Vencord.Components.Button,
-            { onClick: () => VencordMobileNative.openVendroidSettings() },
-            "Open Vendroid Settings"
+            "div",
+            { style: { display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8 } },
+            React.createElement(
+                Vencord.Components.Button,
+                { onClick: () => VencordMobileNative.openVendroidSettings() },
+                "Open Vendroid Settings"
+            ),
+            React.createElement(
+                Vencord.Components.Button,
+                { onClick: () => VencordMobileNative.openVencordUpdater() },
+                "Open Updater"
+            )
         );
     }
     Vencord.Plugins.plugins.Settings.customEntries.push({
@@ -52,10 +61,8 @@
     };
 
     document.addEventListener("DOMContentLoaded", () => document.documentElement.appendChild(
-        Object.assign(document.createElement("link"), {
-            rel: "stylesheet",
-            type: "text/css",
-            href: "https://github.com/Vendicated/Vencord/releases/download/devbuild/browser.css"
+        Object.assign(document.createElement("style"), {
+            textContent: VencordMobileNative.getVencordCss()
         })
     ), { once: true });
 })();

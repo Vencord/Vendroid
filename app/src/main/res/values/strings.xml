@@ -1,5 +1,20 @@
 <resources>
     <string name="app_name">Vendroid</string>
     <string name="vendroid_settings">Vendroid Settings</string>
+    <string name="vencord_updater">Vencord Updater</string>
     <string name="use_desktop_ui">Use desktop UI</string>
+    <string name="auto_updates">Auto updates</string>
+    <string name="updates">Updates</string>
+    <string name="downloading_vencord">Downloading Vencord…</string>
+    <string name="vencord_download_failed">Failed to download Vencord. Please check your connection and try again.</string>
+    <string name="checking_for_updates">Checking for updates…</string>
+    <string name="up_to_date">Up to date (%1$s)</string>
+    <string name="update_available">Update available: %1$s (installed: %2$s)</string>
+    <string name="unknown_version">unknown</string>
+    <string name="update">Update</string>
+    <string name="updating">Updating…</string>
+    <string name="retry">Retry</string>
+    <string name="update_failed">Update failed: %1$s</string>
+    <string name="update_check_failed">Failed to check for updates: %1$s</string>
+    <string name="updated_to">Updated to %1$s</string>
 </resources>
