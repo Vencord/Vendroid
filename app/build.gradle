@@ -3,33 +3,36 @@ plugins {
 }
 
 android {
-    namespace 'dev.vendicated.vencord'
-    compileSdk 33
+    namespace = 'dev.vendicated.vencord'
+    compileSdk = 36
 
     defaultConfig {
-        applicationId "dev.vendicated.vencord"
-        minSdk 21
-        targetSdk 33
-        versionCode 3
-        versionName "1.0"
+        applicationId = "dev.vendicated.vencord"
+        minSdk = 21
+        targetSdk = 36
+        versionCode = 3
+        versionName = "1.0"
     }
 
     buildTypes {
         debug {
-            applicationIdSuffix ".dbg"
+            applicationIdSuffix = ".dbg"
         }
 
         release {
-            minifyEnabled false
+            minifyEnabled = false
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 }
 
 dependencies {
-    implementation 'androidx.annotation:annotation:1.5.0'
+    implementation 'androidx.annotation:annotation:1.9.1'
 }
-
