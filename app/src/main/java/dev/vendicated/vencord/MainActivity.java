@@ -4,9 +4,11 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.view.KeyEvent;
+import android.view.WindowInsets;
 import android.webkit.ValueCallback;
 import android.webkit.WebView;
 
@@ -31,6 +33,8 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         wv = findViewById(R.id.webview);
+
+        applyWindowInsets();
 
         explodeAndroid();
 
@@ -101,6 +105,33 @@ public class MainActivity extends Activity {
             filePathCallback.onReceiveValue(uris);
         }
         filePathCallback = null;
+    }
+
+    private void applyWindowInsets() {
+        var root = findViewById(R.id.root);
+        root.setOnApplyWindowInsetsListener((view, insets) -> {
+            int left, top, right, bottom;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                var bars = insets.getInsets(
+                        WindowInsets.Type.systemBars()
+                                | WindowInsets.Type.displayCutout()
+                                | WindowInsets.Type.ime()
+                );
+                left = bars.left;
+                top = bars.top;
+                right = bars.right;
+                bottom = bars.bottom;
+            } else {
+                left = insets.getSystemWindowInsetLeft();
+                top = insets.getSystemWindowInsetTop();
+                right = insets.getSystemWindowInsetRight();
+                bottom = insets.getSystemWindowInsetBottom();
+            }
+            view.setPadding(left, top, right, bottom);
+            return Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+                    ? WindowInsets.CONSUMED
+                    : insets.consumeSystemWindowInsets();
+        });
     }
 
     private void explodeAndroid() {
