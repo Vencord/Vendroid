@@ -2,6 +2,7 @@ package dev.vendicated.vencord;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -11,6 +12,7 @@ import android.view.KeyEvent;
 import android.view.WindowInsets;
 import android.webkit.ValueCallback;
 import android.webkit.WebView;
+import android.widget.Switch;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -19,6 +21,7 @@ public class MainActivity extends Activity {
     public static final int FILECHOOSER_RESULTCODE = 8485;
     private boolean wvInitialized = false;
     private WebView wv;
+    private String defaultUserAgent;
 
     public ValueCallback<Uri[]> filePathCallback;
 
@@ -45,6 +48,9 @@ public class MainActivity extends Activity {
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
         s.setAllowFileAccess(true);
+
+        defaultUserAgent = s.getUserAgentString();
+        applyUserAgent();
 
         wv.addJavascriptInterface(new VencordNative(this, wv), "VencordMobileNative");
 
@@ -141,6 +147,32 @@ public class MainActivity extends Activity {
                         .permitNetwork()
                         .build()
         );
+    }
+
+    private void applyUserAgent() {
+        var s = wv.getSettings();
+        s.setUserAgentString(
+                VendroidSettings.isDesktopUiEnabled(this)
+                        ? VendroidSettings.desktopUserAgent(defaultUserAgent)
+                        : defaultUserAgent
+        );
+    }
+
+    public void openVendroidSettings() {
+        var view = getLayoutInflater().inflate(R.layout.dialog_vendroid_settings, null);
+        var desktopUiSwitch = (Switch) view.findViewById(R.id.desktop_ui_switch);
+        desktopUiSwitch.setChecked(VendroidSettings.isDesktopUiEnabled(this));
+        desktopUiSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            VendroidSettings.setDesktopUiEnabled(this, isChecked);
+            applyUserAgent();
+            wv.reload();
+        });
+
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.vendroid_settings)
+                .setView(view)
+                .setPositiveButton(android.R.string.ok, null)
+                .show();
     }
 
     public void handleUrl(Uri url) {

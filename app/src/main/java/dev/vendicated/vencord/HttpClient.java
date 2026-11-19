@@ -47,7 +47,7 @@ public class HttpClient {
         if (VencordRuntime != null) return;
 
         var res = activity.getResources();
-        try (var is = res.openRawResource(R.raw.vencord_mobile)) {
+        try (var is = res.openRawResource(R.raw.vendroid_script)) {
             VencordMobileRuntime = readAsText(is);
         }
 

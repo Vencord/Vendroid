@@ -3,6 +3,22 @@
     const ModalEscapeHandler = findLazy(m => m.binds?.length === 1 && m.binds[0] === "esc");
 
     let isSidebarOpen = false;
+
+    function VendroidSettings() {
+        const { React } = Common;
+        return React.createElement(
+            Vencord.Components.Button,
+            { onClick: () => VencordMobileNative.openVendroidSettings() },
+            "Open Vendroid Settings"
+        );
+    }
+    Vencord.Plugins.plugins.Settings.customEntries.push({
+        key: "vendroid_settings",
+        title: "Vendroid",
+        Component: VendroidSettings,
+        Icon: Vencord.Components.WebsiteIcon
+    });
+
     onceReady.then(() => {
         Common.FluxDispatcher.subscribe("MOBILE_WEB_SIDEBAR_OPEN", () => {
             isSidebarOpen = true;

@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Vendroid</string>
+    <string name="vendroid_settings">Vendroid Settings</string>
+    <string name="use_desktop_ui">Use desktop UI</string>
 </resources>
