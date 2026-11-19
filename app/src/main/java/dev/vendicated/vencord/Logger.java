@@ -3,7 +3,7 @@ package dev.vendicated.vencord;
 import android.util.Log;
 
 public final class Logger {
-    private static final String TAG = "Vencord";
+    private static final String TAG = "Vendroid";
 
     public static void e(String message) {
         Log.e(TAG, message);

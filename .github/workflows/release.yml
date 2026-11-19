@@ -44,8 +44,8 @@ jobs:
             -Pandroid.injected.signing.key.alias="$KEY_ALIAS" \
             -Pandroid.injected.signing.key.password="$KEY_PASSWORD"
           
-          mv app/build/outputs/apk/release/app-release.apk Vencord-$TAG.apk
-          gh release create $TAG --generate-notes --title "Vencord $TAG" Vencord-$TAG.apk
+          mv app/build/outputs/apk/release/app-release.apk Vendroid-$TAG.apk
+          gh release create $TAG --generate-notes --title "Vendroid $TAG" Vendroid-$TAG.apk
         env:
           TAG: ${{ env.release_tag }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
