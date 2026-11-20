@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+fail() {
+    printf '%s\n' "$1" >&2
+    exit 1
+}
+
+sdk=${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}
+[[ -n $sdk ]] || fail 'Set ANDROID_HOME or ANDROID_SDK_ROOT to the Android SDK directory.'
+[[ -n ${ANDROID_AVD_HOME:-} ]] || fail 'Set ANDROID_AVD_HOME to the directory containing your AVDs.'
+
+emulator="$sdk/emulator/emulator"
+avd=${ANDROID_AVD:-}
+
+find_running_emulator() {
+    local serials serial name
+    serials=$(adb devices | awk '$1 ~ /^emulator-[0-9]+$/ { print $1 }') || return
+
+    if [[ -z $avd ]]; then
+        if [[ $serials == *$'\n'* ]]; then
+            fail 'Multiple emulators are running. Set ANDROID_AVD to select one.'
+        fi
+
+        printf '%s\n' "$serials"
+        return
+    fi
+
+    while read -r serial; do
+        [[ -n $serial ]] || continue
+
+        if name=$(adb -s "$serial" emu avd name 2>/dev/null | tr -d '\r') &&
+            [[ ${name%%$'\n'*} == "$avd" ]]; then
+            printf '%s\n' "$serial"
+            return
+        fi
+    done <<< "$serials"
+}
+
+if [[ ${1:-} == --running ]]; then
+    serial=$(find_running_emulator)
+    [[ -n $serial ]] || fail 'No matching emulator is running. Run scripts/launchEmulator first.'
+
+    printf '%s\n' "$serial"
+    exit 0
+fi
+
+# Keep concurrent launcher calls from starting the same AVD.
+exec 9>"${XDG_RUNTIME_DIR:-/tmp}/vendroid-emulator-$UID.lock"
+flock 9
+
+serial=$(find_running_emulator)
+emulator_pid=
+
+if [[ -z $serial ]]; then
+    avds=$("$emulator" -list-avds)
+    [[ -n $avds ]] || fail "No AVDs found in $ANDROID_AVD_HOME."
+
+    if [[ -z $avd ]]; then
+        if [[ $avds == *$'\n'* ]]; then
+            printf 'Multiple AVDs found:\n%s\n' "$avds" >&2
+            fail 'Set ANDROID_AVD to select one.'
+        fi
+
+        avd=$avds
+    fi
+
+    if ! grep -Fxq -- "$avd" <<< "$avds"; then
+        fail "AVD $avd was not found in $ANDROID_AVD_HOME."
+    fi
+
+    log=$(mktemp "${TMPDIR:-/tmp}/vendroid-emulator.XXXXXX.log")
+    nohup "$emulator" -avd "$avd" </dev/null >"$log" 2>&1 9>&- &
+    emulator_pid=$!
+    printf 'Starting %s. Emulator log is at %s\n' "$avd" "$log" >&2
+fi
+
+deadline=$((SECONDS + 180))
+
+while (( SECONDS < deadline )); do
+    if [[ -z $serial ]]; then
+        serial=$(find_running_emulator)
+    fi
+
+    if [[ -n $serial ]] &&
+        boot_status=$(adb -s "$serial" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r') &&
+        [[ $boot_status == 1 ]]; then
+        printf '%s\n' "$serial"
+        exit 0
+    fi
+
+    if [[ -n $emulator_pid ]] && ! kill -0 "$emulator_pid" 2>/dev/null; then
+        fail "Emulator exited during startup. See $log"
+    fi
+
+    sleep 1
+done
+
+fail "Timed out waiting for ${serial:-$avd} to boot."

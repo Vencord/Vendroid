@@ -1,0 +1,157 @@
+#!/usr/bin/env node
+
+import { readFile } from 'node:fs/promises';
+import { setTimeout as delay } from 'node:timers/promises';
+import { parseEnv } from 'node:util';
+
+import { connect } from './cdp.mjs';
+
+const discordOrigins = [
+    'https://discord.com',
+    'https://ptb.discord.com',
+    'https://canary.discord.com'
+];
+
+const authTimeout = 60_000;
+
+// This function runs inside the WebView.
+async function discordSession(origins, token) {
+    if (!origins.includes(location.origin) || !window.Vencord) {
+        return 'loading';
+    }
+
+    const { Webpack } = window.Vencord;
+    const { AuthenticationStore } = Webpack.Common;
+
+    if (!AuthenticationStore) {
+        return 'loading';
+    }
+
+    if (AuthenticationStore.getId()) {
+        return 'logged in';
+    }
+
+    const auth = Webpack.findByProps('loginToken');
+
+    if (!auth) {
+        return 'loading';
+    }
+
+    if (!token) {
+        return 'ready';
+    }
+
+    await auth.loginToken(token);
+    return 'submitted';
+}
+
+function sessionExpression(token = '') {
+    return `(${discordSession})(${JSON.stringify(discordOrigins)}, ${JSON.stringify(token)})`;
+}
+
+function isNavigationError(error) {
+    const navigationError = /execution context (?:was destroyed|with given id)|Cannot find (?:default )?context|Inspected target navigated/i;
+    return navigationError.test(error.message);
+}
+
+async function waitForStatus(cdp, expected, timeoutMessage) {
+    const expression = sessionExpression();
+    const deadline = Date.now() + authTimeout;
+
+    do {
+        try {
+            const status = await cdp.evaluate(expression);
+
+            if (expected.includes(status)) {
+                return status;
+            }
+        } catch (error) {
+            if (!isNavigationError(error)) {
+                throw error;
+            }
+        }
+
+        await delay(500);
+    } while (Date.now() < deadline);
+
+    throw new Error(timeoutMessage);
+}
+
+async function readToken() {
+    const path = new URL('../.env', import.meta.url);
+    let contents;
+
+    try {
+        contents = await readFile(path, 'utf8');
+    } catch (error) {
+        if (error.code !== 'ENOENT') {
+            throw error;
+        }
+
+        contents = '';
+    }
+
+    const { DISCORD_TOKEN: token } = parseEnv(contents);
+
+    if (!token) {
+        throw new Error('Set DISCORD_TOKEN in the repository .env file to log in.');
+    }
+
+    return token;
+}
+
+async function submitLogin(cdp, token) {
+    let status;
+
+    try {
+        status = await cdp.evaluate(sessionExpression(token));
+    } catch (error) {
+        // Login may navigate before CDP can return the result.
+        if (isNavigationError(error)) {
+            return;
+        }
+
+        throw new Error('Could not submit Discord login. Check the WebView and DISCORD_TOKEN in .env.');
+    }
+
+    if (status === 'loading') {
+        throw new Error('The Discord WebView navigated before login could start.');
+    }
+}
+
+async function main() {
+    const cdp = await connect({
+        matches: ({ url }) => URL.canParse(url) && discordOrigins.includes(new URL(url).origin)
+    });
+
+    try {
+        const status = await waitForStatus(
+            cdp,
+            ['logged in', 'ready'],
+            'Timed out waiting for Vencord authentication to load.'
+        );
+
+        if (status === 'logged in') {
+            console.log('Discord is already logged in.');
+            return;
+        }
+
+        const token = await readToken();
+        await submitLogin(cdp, token);
+
+        await waitForStatus(
+            cdp,
+            ['logged in'],
+            'Discord did not report a logged-in session. Check DISCORD_TOKEN in .env.'
+        );
+
+        console.log('Logged in to Discord.');
+    } finally {
+        await cdp.close();
+    }
+}
+
+main().catch(error => {
+    console.error(error.message);
+    process.exitCode = 1;
+});
