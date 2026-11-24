@@ -1,4 +1,4 @@
-name: Release
+name: Draft Vendroid release
 on:
   push:
     tags:
@@ -45,15 +45,12 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
 
-      - name: Publish Release
+      - name: Create Draft Release
         shell: bash
         run: |
-          gh api --method POST "repos/$GITHUB_REPOSITORY/releases/generate-notes" -f "tag_name=$TAG" |
-            python3 scripts/prepareRelease.py "$TAG" app/build/outputs/apk/release
-
-          # With assets, gh uploads everything to a draft before publishing it.
-          gh release create "$TAG" --verify-tag --title "Vendroid $TAG" \
-            --notes-file changelog.md "Vendroid-$TAG.apk" latest.json
+          apk="Vendroid-$TAG.apk"
+          mv app/build/outputs/apk/release/app-release.apk "$apk"
+          gh release create "$TAG" "$apk" --draft --verify-tag --title "Vendroid $TAG"
         env:
           TAG: ${{ github.ref_name }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
