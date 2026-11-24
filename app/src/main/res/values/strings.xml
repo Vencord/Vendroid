@@ -19,6 +19,11 @@
     <string name="update_available">Update available: %1$s (installed: %2$s)</string>
     <string name="unknown_version">unknown</string>
     <string name="update">Update</string>
+    <string name="vendroid_update_title">Vendroid %1$s is available</string>
+    <string name="vendroid_no_release_notes">No release notes are available.</string>
+    <string name="vendroid_remind_later">Remind later</string>
+    <string name="vendroid_skip_update">Skip update</string>
+    <string name="vendroid_no_browser">No browser is available to download the update.</string>
     <string name="updating">Updating…</string>
     <string name="retry">Retry</string>
     <string name="update_failed">Update failed: %1$s</string>

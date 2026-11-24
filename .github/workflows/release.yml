@@ -7,7 +7,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout builds
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -26,15 +28,10 @@ jobs:
 
       - name: Setup credentials
         run: |
-          base64 -d <<< "$KEYSTORE_BASE64" > $HOME/keystore.jks
+          base64 -d <<< "$KEYSTORE_BASE64" > "$HOME/keystore.jks"
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-      
-      - name: Get some values needed for the release
-        id: release_values
-        run: |
-          echo "release_tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-          
+
       - name: Build Release
         run: |
           chmod +x ./gradlew
@@ -43,12 +40,40 @@ jobs:
             -Pandroid.injected.signing.store.password="$KEYSTORE_PASSWORD" \
             -Pandroid.injected.signing.key.alias="$KEY_ALIAS" \
             -Pandroid.injected.signing.key.password="$KEY_PASSWORD"
-          
-          mv app/build/outputs/apk/release/app-release.apk Vendroid-$TAG.apk
-          gh release create $TAG --generate-notes --title "Vendroid $TAG" Vendroid-$TAG.apk
         env:
-          TAG: ${{ env.release_tag }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           KEY_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+
+      - name: Publish Release
+        shell: bash
+        run: |
+          if [[ ! "$TAG" =~ ^v[0-9][A-Za-z0-9._-]*$ ]]; then
+            echo "Invalid Vendroid release tag: $TAG" >&2
+            exit 1
+          fi
+
+          apk_dir=app/build/outputs/apk/release
+          apk_name="Vendroid-$TAG.apk"
+          gh api --method POST "repos/$GITHUB_REPOSITORY/releases/generate-notes" \
+            -f "tag_name=$TAG" | jq -erj '.body | strings' > changelog.md
+
+          jq -e --arg tag "$TAG" --rawfile changelog changelog.md '
+            .elements[] | select(.outputFile == "app-release.apk")
+            | {
+                tag: $tag,
+                versionCode,
+                versionName,
+                changelog: $changelog
+              }
+            | select((.versionCode | type) == "number" and (.versionCode > 0)
+                and (.versionName | type) == "string" and (.versionName | length) > 0)
+          ' "$apk_dir/output-metadata.json" > latest.json
+          mv "$apk_dir/app-release.apk" "$apk_name"
+
+          # With assets, gh uploads everything to a draft before publishing it.
+          gh release create "$TAG" --verify-tag --title "Vendroid $TAG" \
+            --notes-file changelog.md "$apk_name" latest.json
+        env:
+          TAG: ${{ github.ref_name }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

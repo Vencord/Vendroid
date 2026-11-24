@@ -13,6 +13,7 @@ public class VendroidSettings {
     private static final String PREFS_NAME = "vendroid_settings";
     private static final String KEY_DESKTOP_UI = "desktop_ui";
     private static final String KEY_AUTO_UPDATES = "auto_updates";
+    private static final String KEY_SKIPPED_APP_VERSION = "skipped_app_version";
     private static final String KEY_INSTALLED_HASH = "installed_hash";
     private static final String KEY_BRANCH = "branch";
     private static final Pattern CHROME_VERSION = Pattern.compile("Chrome/[\\d.]+");
@@ -35,6 +36,14 @@ public class VendroidSettings {
 
     public static void setAutoUpdatesEnabled(Context ctx, boolean enabled) {
         prefs(ctx).edit().putBoolean(KEY_AUTO_UPDATES, enabled).apply();
+    }
+
+    public static int getSkippedAppVersion(Context ctx) {
+        return prefs(ctx).getInt(KEY_SKIPPED_APP_VERSION, 0);
+    }
+
+    public static void setSkippedAppVersion(Context ctx, int versionCode) {
+        prefs(ctx).edit().putInt(KEY_SKIPPED_APP_VERSION, versionCode).apply();
     }
 
     public static String getInstalledHash(Context ctx) {

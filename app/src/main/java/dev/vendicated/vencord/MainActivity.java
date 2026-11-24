@@ -77,6 +77,7 @@ public class MainActivity extends Activity {
         }
 
         wvInitialized = true;
+        VendroidUpdater.checkOnLaunch(this);
     }
 
     @Override

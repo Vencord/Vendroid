@@ -35,4 +35,9 @@ android {
 
 dependencies {
     implementation 'androidx.annotation:annotation:1.9.1'
+
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
+    // Local JVM tests need a real implementation of Android's org.json API.
+    testImplementation 'org.json:json:20250517'
 }
