@@ -11,9 +11,3 @@ Discord's web site is pretty bad and slow on mobile, so you should probably use 
 ## Download
 
 Visit the [latest release](https://github.com/Vencord/Vendroid/releases/latest), grab the apk and install it
-
-After installing a release that supports update checks, Vendroid checks for a newer
-app version on launch. **Update** opens that release's APK in your browser so
-Android can install it. **Remind later** checks again the next time you launch the
-app from a stopped state, and **Skip update** hides that version only.
-The app updater is separate from Vencord's bundle updater.

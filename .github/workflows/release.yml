@@ -48,32 +48,12 @@ jobs:
       - name: Publish Release
         shell: bash
         run: |
-          if [[ ! "$TAG" =~ ^v[0-9][A-Za-z0-9._-]*$ ]]; then
-            echo "Invalid Vendroid release tag: $TAG" >&2
-            exit 1
-          fi
-
-          apk_dir=app/build/outputs/apk/release
-          apk_name="Vendroid-$TAG.apk"
-          gh api --method POST "repos/$GITHUB_REPOSITORY/releases/generate-notes" \
-            -f "tag_name=$TAG" | jq -erj '.body | strings' > changelog.md
-
-          jq -e --arg tag "$TAG" --rawfile changelog changelog.md '
-            .elements[] | select(.outputFile == "app-release.apk")
-            | {
-                tag: $tag,
-                versionCode,
-                versionName,
-                changelog: $changelog
-              }
-            | select((.versionCode | type) == "number" and (.versionCode > 0)
-                and (.versionName | type) == "string" and (.versionName | length) > 0)
-          ' "$apk_dir/output-metadata.json" > latest.json
-          mv "$apk_dir/app-release.apk" "$apk_name"
+          gh api --method POST "repos/$GITHUB_REPOSITORY/releases/generate-notes" -f "tag_name=$TAG" |
+            python3 scripts/prepareRelease.py "$TAG" app/build/outputs/apk/release
 
           # With assets, gh uploads everything to a draft before publishing it.
           gh release create "$TAG" --verify-tag --title "Vendroid $TAG" \
-            --notes-file changelog.md "$apk_name" latest.json
+            --notes-file changelog.md "Vendroid-$TAG.apk" latest.json
         env:
           TAG: ${{ github.ref_name }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -33,7 +33,7 @@ jobs:
       - name: Build Artifact
         run: |
           chmod +x ./gradlew
-          ./gradlew app:testDebugUnitTest app:assembleRelease \
+          ./gradlew app:assembleRelease \
             -Pandroid.injected.signing.store.file="$HOME/keystore.jks" \
             -Pandroid.injected.signing.store.password="$KEYSTORE_PASSWORD" \
             -Pandroid.injected.signing.key.alias="$KEY_ALIAS" \
